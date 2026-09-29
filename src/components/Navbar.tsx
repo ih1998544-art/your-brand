@@ -282,6 +282,76 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
             </div>
           </nav>
+        ) : currentDepartment === 'Teens' ? (
+          <nav
+            aria-label="Teens categories"
+            className="flex justify-start md:justify-center items-center gap-5 sm:gap-7 lg:gap-9 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1"
+          >
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Summer 26')}
+                className="font-bold text-amber-600 hover:text-amber-700 transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <span>Summer '26</span>
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Teen Girls')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+              >
+                Teen Girls
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Teen Boys')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+              >
+                Teen Boys
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Kid Girls')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+              >
+                Kid Girls
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Kid Boys')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+              >
+                Kid Boys
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Infant')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+              >
+                Infant
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Trending')}
+                className="hover:text-black text-neutral-900 font-semibold transition-colors cursor-pointer"
+              >
+                Trending
+              </button>
+            </div>
+            <div className="py-2.5">
+              <button
+                onClick={() => handleNavClick('Sale')}
+                className="text-red-700 font-semibold hover:text-red-800 transition-colors cursor-pointer"
+              >
+                Sale
+              </button>
+            </div>
+          </nav>
         ) : (
           <nav
             aria-label="Women's categories"

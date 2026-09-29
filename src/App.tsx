@@ -20,10 +20,12 @@ import { OrderTrackingModal } from './components/OrderTrackingModal';
 import { SignInModal } from './components/SignInModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import { Toast } from './components/Toast';
+import { TeensHomepage } from './components/teens/TeensHomepage';
+import { INITIAL_TRENDING_PRODUCTS, INITIAL_TRENDING_FITS, adaptTeenToProduct } from './data/teensData';
 
 export default function App() {
   // Navigation & Department
-  const [currentDepartment, setCurrentDepartment] = useState<Department>('Woman');
+  const [currentDepartment, setCurrentDepartment] = useState<Department>('Teens');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]); // default PKR
 
   // Wishlist state
@@ -144,10 +146,21 @@ export default function App() {
     });
   };
 
+  const allTeensAdaptedProducts = useMemo(() => {
+    return [
+      ...INITIAL_TRENDING_PRODUCTS.map(adaptTeenToProduct),
+      ...INITIAL_TRENDING_FITS.map(adaptTeenToProduct),
+    ];
+  }, []);
+
+  const allAvailableProducts = useMemo(() => {
+    return [...PRODUCTS, ...allTeensAdaptedProducts];
+  }, [allTeensAdaptedProducts]);
+
   // Filtered lists
   const wishlistProducts = useMemo(() => {
-    return PRODUCTS.filter((p) => wishlistIds.has(p.id));
-  }, [wishlistIds]);
+    return allAvailableProducts.filter((p) => wishlistIds.has(p.id));
+  }, [wishlistIds, allAvailableProducts]);
 
   const departmentProducts = useMemo(() => {
     if (currentDepartment === 'Man') {
@@ -170,6 +183,15 @@ export default function App() {
   const handleShopCategory = (categoryName: string) => {
     notify(`Browsing collection: ${categoryName}`);
     const lower = categoryName.toLowerCase().trim();
+
+    if (currentDepartment === 'Teens') {
+      setActiveCategoryFilter(categoryName);
+      const elem = document.getElementById('trending');
+      if (elem) {
+        elem.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
 
     if (currentDepartment === 'Man') {
       if (lower === 'new in' || lower === 'new') {
@@ -287,62 +309,77 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {/* Hero Carousel */}
-        <HeroCarousel onShopClick={handleShopCategory} department={currentDepartment} />
-
-        {/* Shop by Category Grid */}
-        <CategoryGrid onSelectCategory={handleShopCategory} department={currentDepartment} />
-
-        {/* Full-width Noya Collection Feature */}
-        <FeaturedBanner onShopClick={handleShopCategory} department={currentDepartment} />
-
-        {/* Trending Section (Ready to Wear, Unstitched, Formals) */}
-        <div id="trending-section">
-          <TrendingSection
-            products={departmentProducts}
-            department={currentDepartment}
+        {currentDepartment === 'Teens' ? (
+          <TeensHomepage
             currency={selectedCurrency}
             wishlistIds={wishlistIds}
             onToggleWishlist={handleToggleWishlist}
             onQuickAdd={handleQuickAdd}
             onViewProduct={(p) => setSelectedProduct(p)}
-            onSeeAll={(tab) => {
-              setActiveCategoryFilter(null);
-              setTrendingTab(tab);
-              notify(`Showing all ${tab.toUpperCase()} items`);
-            }}
-            activeTab={trendingTab}
-            onSelectTab={(tab) => {
-              setTrendingTab(tab);
-              setActiveCategoryFilter(null);
-            }}
-            categoryFilter={activeCategoryFilter}
-            onClearFilter={() => setActiveCategoryFilter(null)}
+            activeCategoryFilter={activeCategoryFilter}
+            onFilterCategory={handleShopCategory}
+            onNotify={notify}
           />
-        </div>
+        ) : (
+          <>
+            {/* Hero Carousel */}
+            <HeroCarousel onShopClick={handleShopCategory} department={currentDepartment} />
 
-        {/* 2-Column High-Impact Banners */}
-        <TwoColumnBanners onBannerClick={handleShopCategory} department={currentDepartment} />
+            {/* Shop by Category Grid */}
+            <CategoryGrid onSelectCategory={handleShopCategory} department={currentDepartment} />
 
-        {/* Horizontal Rail: Trending Fits */}
-        <TrendingFitsRail
-          products={trendingFitsProducts}
-          currency={selectedCurrency}
-          wishlistIds={wishlistIds}
-          onToggleWishlist={handleToggleWishlist}
-          onQuickAdd={handleQuickAdd}
-          onViewProduct={(p) => setSelectedProduct(p)}
-          onSeeAll={() => notify(currentDepartment === 'Man' ? "Viewing full Men's fits catalogue" : 'Viewing full Kurta fits catalogue')}
-        />
+            {/* Full-width Noya Collection Feature */}
+            <FeaturedBanner onShopClick={handleShopCategory} department={currentDepartment} />
 
-        {/* 3-Column Visual Banners */}
-        <ThreeColumnBanners onBannerClick={handleShopCategory} department={currentDepartment} />
+            {/* Trending Section (Ready to Wear, Unstitched, Formals) */}
+            <div id="trending-section">
+              <TrendingSection
+                products={departmentProducts}
+                department={currentDepartment}
+                currency={selectedCurrency}
+                wishlistIds={wishlistIds}
+                onToggleWishlist={handleToggleWishlist}
+                onQuickAdd={handleQuickAdd}
+                onViewProduct={(p) => setSelectedProduct(p)}
+                onSeeAll={(tab) => {
+                  setActiveCategoryFilter(null);
+                  setTrendingTab(tab);
+                  notify(`Showing all ${tab.toUpperCase()} items`);
+                }}
+                activeTab={trendingTab}
+                onSelectTab={(tab) => {
+                  setTrendingTab(tab);
+                  setActiveCategoryFilter(null);
+                }}
+                categoryFilter={activeCategoryFilter}
+                onClearFilter={() => setActiveCategoryFilter(null)}
+              />
+            </div>
 
-        {/* Store Locator CTA Strip */}
-        <StoreLocatorSection
-          onOpenStoreLocator={() => setStoreLocatorOpen(true)}
-          department={currentDepartment}
-        />
+            {/* 2-Column High-Impact Banners */}
+            <TwoColumnBanners onBannerClick={handleShopCategory} department={currentDepartment} />
+
+            {/* Horizontal Rail: Trending Fits */}
+            <TrendingFitsRail
+              products={trendingFitsProducts}
+              currency={selectedCurrency}
+              wishlistIds={wishlistIds}
+              onToggleWishlist={handleToggleWishlist}
+              onQuickAdd={handleQuickAdd}
+              onViewProduct={(p) => setSelectedProduct(p)}
+              onSeeAll={() => notify(currentDepartment === 'Man' ? "Viewing full Men's fits catalogue" : 'Viewing full Kurta fits catalogue')}
+            />
+
+            {/* 3-Column Visual Banners */}
+            <ThreeColumnBanners onBannerClick={handleShopCategory} department={currentDepartment} />
+
+            {/* Store Locator CTA Strip */}
+            <StoreLocatorSection
+              onOpenStoreLocator={() => setStoreLocatorOpen(true)}
+              department={currentDepartment}
+            />
+          </>
+        )}
       </main>
 
       {/* Footer */}
@@ -393,7 +430,7 @@ export default function App() {
       <SearchModal
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
-        products={PRODUCTS}
+        products={allAvailableProducts}
         currency={selectedCurrency}
         onSelectProduct={(p) => setSelectedProduct(p)}
         department={currentDepartment}
