@@ -38,7 +38,13 @@ export const SearchModal: React.FC<SearchModalProps> = ({
         p.name.toLowerCase().includes(q) ||
         p.fabric.toLowerCase().includes(q) ||
         p.details.toLowerCase().includes(q) ||
-        p.department.toLowerCase().includes(q)
+        p.department.toLowerCase().includes(q) ||
+        p.beautyCategory?.toLowerCase().includes(q) ||
+        p.subCategory?.toLowerCase().includes(q) ||
+        (p.fragranceNotes &&
+          (p.fragranceNotes.top?.toLowerCase().includes(q) ||
+            p.fragranceNotes.heart?.toLowerCase().includes(q) ||
+            p.fragranceNotes.base?.toLowerCase().includes(q)))
     );
   }, [searchTerm, products]);
 
@@ -87,12 +93,14 @@ export const SearchModal: React.FC<SearchModalProps> = ({
           <span className="text-[11px] text-neutral-400 uppercase font-medium">Trending:</span>
           {(department === 'Man'
             ? ['Boski', 'Kameez Shalwar', 'Waistcoat', 'Karandi', 'Latha', 'Peshawari']
+            : department === 'Fragrance & Beauty'
+            ? ['Oud', 'Eau De Parfum', 'Lipstick', 'Serum', 'Bakhoor', 'Candle', 'Rose']
             : ['Lawn', 'Co-Ords', 'Velvet', 'Organza', 'Raw Silk', 'Unstitched']
           ).map((tag) => (
             <button
               key={tag}
               onClick={() => setSearchTerm(tag)}
-              className="px-2.5 py-0.5 bg-white border border-neutral-200 rounded-xs hover:border-neutral-800 transition-colors whitespace-nowrap"
+              className="px-2.5 py-0.5 bg-white border border-neutral-200 rounded-xs hover:border-neutral-800 transition-colors whitespace-nowrap cursor-pointer"
             >
               {tag}
             </button>

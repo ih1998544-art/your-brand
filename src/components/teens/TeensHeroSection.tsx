@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { HeroSlide, INITIAL_HERO_SLIDES, TeenCategory } from '../../data/teensData';
-import { ArrowRight, ChevronLeft, ChevronRight, Edit3 } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface TeensHeroSectionProps {
   slides?: HeroSlide[];
   onSelectCategory: (categoryName: TeenCategory | string) => void;
-  onOpenCms?: () => void;
 }
 
 export const TeensHeroSection: React.FC<TeensHeroSectionProps> = ({
   slides = INITIAL_HERO_SLIDES,
   onSelectCategory,
-  onOpenCms,
 }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -76,18 +74,6 @@ export const TeensHeroSection: React.FC<TeensHeroSectionProps> = ({
           </div>
         );
       })}
-
-      {/* Admin Quick Edit Button */}
-      {onOpenCms && (
-        <button
-          onClick={onOpenCms}
-          className="absolute top-4 right-4 z-30 bg-white/90 hover:bg-white text-neutral-900 px-3 py-1.5 rounded-full text-xs font-semibold shadow-md flex items-center gap-1.5 transition-all backdrop-blur-xs"
-          title="Edit Section 1 in CMS"
-        >
-          <Edit3 className="w-3.5 h-3.5" />
-          <span>Edit Hero</span>
-        </button>
-      )}
 
       {/* Navigation Arrows */}
       <button

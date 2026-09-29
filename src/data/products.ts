@@ -1,5 +1,6 @@
 import { Product, StoreLocation } from '../types';
 import { MEN_PRODUCTS } from './menProducts';
+import { FRAGRANCE_BEAUTY_PRODUCTS } from './fragranceBeautyData';
 
 const BASE_PRODUCTS: Product[] = [
   // ==========================================
@@ -1444,7 +1445,7 @@ export const PRODUCTS: Product[] = BASE_PRODUCTS.map((prod, index) => {
     ...prod,
     images: gallery.length > 0 ? gallery : (primary ? [primary] : []),
   };
-});
+}).concat(FRAGRANCE_BEAUTY_PRODUCTS);
 
 export const STORES: StoreLocation[] = [
   {

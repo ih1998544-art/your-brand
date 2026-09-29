@@ -1,17 +1,15 @@
 import React from 'react';
 import { PromoBanner } from '../../data/teensData';
-import { ArrowRight, Edit3 } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface TeensCollectionBannersProps {
   banners: PromoBanner[];
   onBannerClick: (link: string, category: string) => void;
-  onOpenCms?: () => void;
 }
 
 export const TeensCollectionBanners: React.FC<TeensCollectionBannersProps> = ({
   banners,
   onBannerClick,
-  onOpenCms,
 }) => {
   const activeBanners = [...banners]
     .filter((b) => b.isActive)
@@ -28,17 +26,6 @@ export const TeensCollectionBanners: React.FC<TeensCollectionBannersProps> = ({
             Collection Features
           </h2>
         </div>
-
-        {onOpenCms && (
-          <button
-            onClick={onOpenCms}
-            className="text-xs text-neutral-500 hover:text-neutral-900 flex items-center gap-1 font-semibold uppercase tracking-wider"
-            title="Edit Collection Banners"
-          >
-            <Edit3 className="w-3.5 h-3.5" />
-            <span>CMS</span>
-          </button>
-        )}
       </div>
 
       {/* 3 Collection Banners */}

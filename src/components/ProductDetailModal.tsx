@@ -239,29 +239,64 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               )}
             </div>
 
-            {/* Garment Details */}
-            <div className="mb-6">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-900 mb-2">
-                Garment Description
+            {/* Product Details / Garment Details */}
+            <div className="mb-5">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-900 mb-1.5">
+                {product.department === 'Fragrance & Beauty' ? 'Formula & Details' : 'Garment Description'}
               </h4>
               <p className="text-xs sm:text-[13px] text-neutral-600 leading-relaxed font-light">
                 {product.details}
               </p>
             </div>
 
-            {/* Size Selector */}
+            {/* Olfactory Notes for Fragrances */}
+            {product.fragranceNotes && (
+              <div className="mb-5 p-3.5 bg-neutral-50 border border-neutral-200 text-xs">
+                <span className="font-semibold text-neutral-900 uppercase tracking-wider block mb-2">
+                  Olfactory Notes
+                </span>
+                <div className="space-y-1 text-neutral-700 text-[11px]">
+                  {product.fragranceNotes.top && (
+                    <p><strong className="text-neutral-950">Top:</strong> {product.fragranceNotes.top}</p>
+                  )}
+                  {product.fragranceNotes.heart && (
+                    <p><strong className="text-neutral-950">Heart:</strong> {product.fragranceNotes.heart}</p>
+                  )}
+                  {product.fragranceNotes.base && (
+                    <p><strong className="text-neutral-950">Base:</strong> {product.fragranceNotes.base}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* How To Use */}
+            {product.howToUse && (
+              <div className="mb-5">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-900 mb-1">
+                  How To Apply
+                </h4>
+                <p className="text-xs text-neutral-600 font-light">
+                  {product.howToUse}
+                </p>
+              </div>
+            )}
+
+            {/* Size / Volume Selector */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider text-neutral-900">
-                  Select Size: <strong className="text-black font-bold">{activeSize}</strong>
+                  {product.department === 'Fragrance & Beauty' ? 'Volume / Shade:' : 'Select Size:'}{' '}
+                  <strong className="text-black font-bold">{activeSize}</strong>
                 </span>
-                <button
-                  onClick={() => setShowSizeGuide(!showSizeGuide)}
-                  className="text-xs text-neutral-600 hover:text-black underline flex items-center gap-1"
-                >
-                  <Ruler className="w-3.5 h-3.5" />
-                  <span>Size Guide</span>
-                </button>
+                {product.department !== 'Fragrance & Beauty' && (
+                  <button
+                    onClick={() => setShowSizeGuide(!showSizeGuide)}
+                    className="text-xs text-neutral-600 hover:text-black underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Ruler className="w-3.5 h-3.5" />
+                    <span>Size Guide</span>
+                  </button>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-2">

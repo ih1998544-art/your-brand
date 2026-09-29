@@ -21,11 +21,12 @@ import { SignInModal } from './components/SignInModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import { Toast } from './components/Toast';
 import { TeensHomepage } from './components/teens/TeensHomepage';
+import { FragranceBeautyHomepage } from './components/beauty/FragranceBeautyHomepage';
 import { INITIAL_TRENDING_PRODUCTS, INITIAL_TRENDING_FITS, adaptTeenToProduct } from './data/teensData';
 
 export default function App() {
   // Navigation & Department
-  const [currentDepartment, setCurrentDepartment] = useState<Department>('Teens');
+  const [currentDepartment, setCurrentDepartment] = useState<Department>('Fragrance & Beauty');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]); // default PKR
 
   // Wishlist state
@@ -184,6 +185,15 @@ export default function App() {
     notify(`Browsing collection: ${categoryName}`);
     const lower = categoryName.toLowerCase().trim();
 
+    if (currentDepartment === 'Fragrance & Beauty') {
+      setActiveCategoryFilter(categoryName);
+      const elem = document.getElementById('beauty-products-section');
+      if (elem) {
+        elem.scrollIntoView({ behavior: 'smooth' });
+      }
+      return;
+    }
+
     if (currentDepartment === 'Teens') {
       setActiveCategoryFilter(categoryName);
       const elem = document.getElementById('trending');
@@ -309,7 +319,19 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1">
-        {currentDepartment === 'Teens' ? (
+        {currentDepartment === 'Fragrance & Beauty' ? (
+          <FragranceBeautyHomepage
+            currency={selectedCurrency}
+            wishlistIds={wishlistIds}
+            onToggleWishlist={handleToggleWishlist}
+            onQuickAdd={handleQuickAdd}
+            onViewProduct={(p) => setSelectedProduct(p)}
+            activeCategoryFilter={activeCategoryFilter}
+            onFilterCategory={handleShopCategory}
+            onNotify={notify}
+            onOpenCheckout={() => setCheckoutOpen(true)}
+          />
+        ) : currentDepartment === 'Teens' ? (
           <TeensHomepage
             currency={selectedCurrency}
             wishlistIds={wishlistIds}

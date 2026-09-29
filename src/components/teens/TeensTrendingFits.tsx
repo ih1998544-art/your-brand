@@ -7,7 +7,6 @@ import {
   Heart,
   ShoppingBag,
   Sparkles,
-  Edit3,
 } from 'lucide-react';
 import { TeensQuickAddModal } from './TeensQuickAddModal';
 
@@ -18,7 +17,6 @@ interface TeensTrendingFitsProps {
   onToggleWishlist: (productId: string, productName: string) => void;
   onQuickAdd: (product: TeenProduct, size: string) => void;
   onViewProduct?: (product: TeenProduct) => void;
-  onOpenCms?: () => void;
 }
 
 export const TeensTrendingFits: React.FC<TeensTrendingFitsProps> = ({
@@ -28,7 +26,6 @@ export const TeensTrendingFits: React.FC<TeensTrendingFitsProps> = ({
   onToggleWishlist,
   onQuickAdd,
   onViewProduct,
-  onOpenCms,
 }) => {
   const [quickAddProduct, setQuickAddProduct] = useState<TeenProduct | null>(null);
   const sliderRef = useRef<HTMLDivElement>(null);
@@ -95,17 +92,6 @@ export const TeensTrendingFits: React.FC<TeensTrendingFitsProps> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
-
-            {onOpenCms && (
-              <button
-                onClick={onOpenCms}
-                className="text-xs text-neutral-500 hover:text-neutral-900 flex items-center gap-1 font-semibold uppercase tracking-wider pl-2 border-l border-neutral-300"
-                title="Edit Trending Fits"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>CMS</span>
-              </button>
-            )}
           </div>
         </div>
 

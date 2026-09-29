@@ -1,17 +1,15 @@
 import React from 'react';
 import { CategoryCard } from '../../data/teensData';
-import { ArrowUpRight, Edit3 } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 
 interface TeensCategoryGridProps {
   categories: CategoryCard[];
   onSelectCategory: (categoryName: string) => void;
-  onOpenCms?: () => void;
 }
 
 export const TeensCategoryGrid: React.FC<TeensCategoryGridProps> = ({
   categories,
   onSelectCategory,
-  onOpenCms,
 }) => {
   const activeCategories = [...categories]
     .filter((c) => c.isActive)
@@ -34,16 +32,6 @@ export const TeensCategoryGrid: React.FC<TeensCategoryGridProps> = ({
           <p className="text-xs text-neutral-500 font-light hidden sm:block">
             Curated silhouettes designed for ages 0 months to 18 years
           </p>
-          {onOpenCms && (
-            <button
-              onClick={onOpenCms}
-              className="text-xs text-neutral-500 hover:text-neutral-900 flex items-center gap-1 font-semibold uppercase tracking-wider"
-              title="Edit Categories"
-            >
-              <Edit3 className="w-3.5 h-3.5" />
-              <span>CMS</span>
-            </button>
-          )}
         </div>
       </div>
 

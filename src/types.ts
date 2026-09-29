@@ -1,4 +1,17 @@
-export type CategoryKey = 'coord' | 'dupatta' | 'kurta' | 'dress' | 'gown' | 'bag' | 'jewel' | 'hero' | 'footwear' | 'accessories';
+export type CategoryKey =
+  | 'coord'
+  | 'dupatta'
+  | 'kurta'
+  | 'dress'
+  | 'gown'
+  | 'bag'
+  | 'jewel'
+  | 'hero'
+  | 'footwear'
+  | 'accessories'
+  | 'fragrance'
+  | 'beauty'
+  | 'skincare';
 
 export type ProductTab =
   | 'new'
@@ -16,7 +29,12 @@ export type ProductTab =
   | 'men_uns'
   | 'men_fk'
   | 'men_fw'
-  | 'men_sale';
+  | 'men_sale'
+  | 'fragrance_all'
+  | 'fragrance_perfume'
+  | 'beauty_makeup'
+  | 'beauty_skincare'
+  | 'beauty_bodyhome';
 
 export type Department = 'Woman' | 'Man' | 'Teens' | 'Fragrance & Beauty' | 'Anniversary B1G1';
 
@@ -37,6 +55,21 @@ export interface Product {
   sku: string;
   imageUrl?: string;
   images?: string[];
+  // Fragrance & Beauty specific rich metadata
+  beautyCategory?: 'Fragrances' | 'Makeup' | 'Skin Care' | 'Body & Home';
+  subCategory?: string;
+  fragranceNotes?: {
+    top?: string;
+    heart?: string;
+    base?: string;
+  };
+  ingredients?: string;
+  howToUse?: string;
+  volume?: string;
+  shade?: string;
+  inStock?: boolean;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export interface CartItem {

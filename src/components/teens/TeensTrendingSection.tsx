@@ -7,7 +7,6 @@ import {
   Heart,
   ShoppingBag,
   Sparkles,
-  Edit3,
   Check,
   Grid3X3,
   SlidersHorizontal,
@@ -24,7 +23,6 @@ interface TeensTrendingSectionProps {
   onToggleWishlist: (productId: string, productName: string) => void;
   onQuickAdd: (product: TeenProduct, size: string) => void;
   onViewProduct?: (product: TeenProduct) => void;
-  onOpenCms?: () => void;
 }
 
 const TABS: TeenCategory[] = [
@@ -46,7 +44,6 @@ export const TeensTrendingSection: React.FC<TeensTrendingSectionProps> = ({
   onToggleWishlist,
   onQuickAdd,
   onViewProduct,
-  onOpenCms,
 }) => {
   const [internalTab, setInternalTab] = useState<string>(activeCategory);
   const [selectedSizes, setSelectedSizes] = useState<Record<string, string>>({});
@@ -188,17 +185,6 @@ export const TeensTrendingSection: React.FC<TeensTrendingSectionProps> = ({
                   <ChevronRight className="w-4 h-4" />
                 </button>
               </div>
-            )}
-
-            {onOpenCms && (
-              <button
-                onClick={onOpenCms}
-                className="text-xs text-neutral-500 hover:text-neutral-900 flex items-center gap-1 font-semibold uppercase tracking-wider pl-2 border-l border-neutral-300 cursor-pointer"
-                title="Edit Products in CMS"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                <span>CMS</span>
-              </button>
             )}
           </div>
         </div>
