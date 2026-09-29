@@ -1809,7 +1809,7 @@ const TRENDING_15: TeenProduct[] = [
 // 8. Sale (15 Marked Down Luxury Articles for Teens & Kids)
 const SALE_15: TeenProduct[] = [
   {
-    id: 'sale-1',
+    id: 'teens-sale-1',
     name: 'Lilac Mist Schiffli Co-Ord Set',
     price: 3990,
     originalPrice: 6490,
@@ -1824,7 +1824,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Limited seasonal sale item with intricate cutwork embroidery.',
   },
   {
-    id: 'sale-2',
+    id: 'teens-sale-2',
     name: 'Olive Sage Tailored Linen Kurta',
     price: 3890,
     originalPrice: 6290,
@@ -1839,7 +1839,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Breezy olive summer linen kurta at exclusive promotional price.',
   },
   {
-    id: 'sale-3',
+    id: 'teens-sale-3',
     name: 'Sunny Lemon Flutter Sleeve Frock',
     price: 2790,
     originalPrice: 4490,
@@ -1854,7 +1854,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Pastel yellow frock with daisy appliques and flutter sleeves on sale.',
   },
   {
-    id: 'sale-4',
+    id: 'teens-sale-4',
     name: 'Azure Coast Junior Kurta Shalwar',
     price: 2990,
     originalPrice: 4990,
@@ -1869,7 +1869,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Popular sky-blue kurta suit with elastic waistband shalwar.',
   },
   {
-    id: 'sale-5',
+    id: 'teens-sale-5',
     name: 'Sunburst Organic Cotton Romper',
     price: 2190,
     originalPrice: 3490,
@@ -1884,7 +1884,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Gentle baby romper with soft snaps on seasonal markdown.',
   },
   {
-    id: 'sale-6',
+    id: 'teens-sale-6',
     name: 'Coral Bloom Floral 2-Piece',
     price: 4190,
     originalPrice: 6890,
@@ -1899,7 +1899,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Vibrant coral florals on cream lawn with matching straight pants.',
   },
   {
-    id: 'sale-7',
+    id: 'teens-sale-7',
     name: 'Midnight Navy Linen Casual Shirt',
     price: 3690,
     originalPrice: 5990,
@@ -1914,7 +1914,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Classic navy mandarin collar shirt on seasonal markdown.',
   },
   {
-    id: 'sale-8',
+    id: 'teens-sale-8',
     name: 'Dusty Pink Kalidar Cotton Frock',
     price: 3290,
     originalPrice: 5490,
@@ -1929,7 +1929,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Twirl flared party frock with golden lace border.',
   },
   {
-    id: 'sale-9',
+    id: 'teens-sale-9',
     name: 'Emerald Festive Cotton Kurta',
     price: 3190,
     originalPrice: 5290,
@@ -1944,7 +1944,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Festive emerald green kurta at special markdown pricing.',
   },
   {
-    id: 'sale-10',
+    id: 'teens-sale-10',
     name: 'Mint Petal Organic Baby Suit',
     price: 2290,
     originalPrice: 3690,
@@ -1959,7 +1959,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Gentle pastel mint 2-piece newborn set on sale.',
   },
   {
-    id: 'sale-11',
+    id: 'teens-sale-11',
     name: 'Blush Meadow Embroidered Summer Frock',
     price: 3790,
     originalPrice: 5990,
@@ -1974,7 +1974,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Floral motifs with breezy scalloped lace accents on sale.',
   },
   {
-    id: 'sale-12',
+    id: 'teens-sale-12',
     name: 'Crisp White Cotton Classic Kurta',
     price: 3490,
     originalPrice: 5490,
@@ -1989,7 +1989,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Staple pristine white kurta with comfortable band collar on sale.',
   },
   {
-    id: 'sale-13',
+    id: 'teens-sale-13',
     name: 'Rosebud Whispers Tiered Smock Frock',
     price: 2690,
     originalPrice: 4290,
@@ -2004,7 +2004,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Graceful floral printed gathers with ribbon ties on sale.',
   },
   {
-    id: 'sale-14',
+    id: 'teens-sale-14',
     name: 'Traditional White Shalwar Kameez Suit',
     price: 2890,
     originalPrice: 4790,
@@ -2019,7 +2019,7 @@ const SALE_15: TeenProduct[] = [
     description: 'Festive traditional kurta with comfort stretch waistband shalwar.',
   },
   {
-    id: 'sale-15',
+    id: 'teens-sale-15',
     name: 'Pure Cloud Organic Baby Two-Piece',
     price: 1990,
     originalPrice: 3290,

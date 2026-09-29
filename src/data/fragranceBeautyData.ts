@@ -107,7 +107,7 @@ export const FRAGRANCE_BEAUTY_PRODUCTS: Product[] = [
   // TOP 10 SALE EXCLUSIVES & DISCOVERY SETS
   // ==========================================
   {
-    id: 'sale-1',
+    id: 'fb-sale-1',
     name: 'The Grand Discovery Fragrance Coffret (5 x 10ml)',
     price: 11500,
     originalPrice: 16500,
@@ -141,7 +141,7 @@ export const FRAGRANCE_BEAUTY_PRODUCTS: Product[] = [
     howToUse: 'Sample each scent individually or layer pulse-point combinations to craft a bespoke olfactory signature.',
   },
   {
-    id: 'sale-2',
+    id: 'fb-sale-2',
     name: 'Royal Velvet Vanity Beauty Coffret (Limited Vault)',
     price: 9200,
     originalPrice: 13800,
@@ -952,9 +952,9 @@ export const FRAGRANCE_BEAUTY_PRODUCTS: Product[] = [
 // Top 10 Curated Sale Products in Fragrance & Beauty
 export const TOP_10_SALE_BEAUTY_PRODUCTS: Product[] = [
   // 1. The Grand Discovery Coffret (-30%)
-  FRAGRANCE_BEAUTY_PRODUCTS.find((p) => p.id === 'sale-1')!,
+  FRAGRANCE_BEAUTY_PRODUCTS.find((p) => p.id === 'fb-sale-1')!,
   // 2. Royal Velvet Vanity Beauty Coffret (-33%)
-  FRAGRANCE_BEAUTY_PRODUCTS.find((p) => p.id === 'sale-2')!,
+  FRAGRANCE_BEAUTY_PRODUCTS.find((p) => p.id === 'fb-sale-2')!,
   // 3. Oud Nocturne Extrait De Parfum (-17%)
   FRAGRANCE_BEAUTY_PRODUCTS.find((p) => p.id === 'frag-1')!,
   // 4. Rose Damascena Eau De Parfum (-13%)

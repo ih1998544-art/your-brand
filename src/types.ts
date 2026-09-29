@@ -68,6 +68,9 @@ export interface Product {
   volume?: string;
   shade?: string;
   inStock?: boolean;
+  stock?: number;
+  featured?: boolean;
+  active?: boolean;
   rating?: number;
   reviewCount?: number;
 }

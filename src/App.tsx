@@ -57,6 +57,13 @@ export default function App() {
 
   // Toast notification state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [, setStoreTick] = useState(0);
+
+  React.useEffect(() => {
+    const handleStoreChange = () => setStoreTick((tick) => tick + 1);
+    window.addEventListener('store_updated', handleStoreChange);
+    return () => window.removeEventListener('store_updated', handleStoreChange);
+  }, []);
 
   const notify = (msg: string) => {
     setToastMessage(msg);

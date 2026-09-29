@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, MapPin } from 'lucide-react';
+import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, MapPin, Shield, Sparkles } from 'lucide-react';
 import { Currency, Department } from '../types';
 import { FragranceMegaMenu } from './beauty/FragranceMegaMenu';
+import { AdminPanelModal } from './AdminPanelModal';
 
 interface NavbarProps {
   currentDepartment: Department;
@@ -42,6 +43,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [currencyDropdownOpen, setCurrencyDropdownOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
   const [fragranceMegaOpen, setFragranceMegaOpen] = useState(false);
+  const [adminModalOpen, setAdminModalOpen] = useState(false);
 
   const departments: Department[] = [
     'Woman',
@@ -61,93 +63,160 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      {/* Top Bar */}
-      <div className="bg-neutral-900 text-neutral-100 text-[11px] tracking-wider uppercase py-2 px-4 flex justify-center items-center gap-6 sm:gap-8 flex-wrap font-medium">
-        <button
-          onClick={onOpenSignIn}
-          className="hover:text-amber-200 transition-colors"
-        >
-          Sign in
-        </button>
-        <button
-          onClick={onOpenTracking}
-          className="hover:text-amber-200 transition-colors"
-        >
-          Tracking info
-        </button>
-        <button
-          onClick={() => onNotify('Complimentary luxury gift wrapping available at checkout')}
-          className="hover:text-amber-200 transition-colors"
-        >
-          Gifting
-        </button>
-        <button
-          onClick={() => onNotify('E-Gift cards delivered directly to recipient inbox')}
-          className="hover:text-amber-200 transition-colors"
-        >
-          Shop e-gift cards
-        </button>
+      {/* ======================================================== */}
+      {/* 1. TOP ANNOUNCEMENT & UTILITY BAR (No Mobile Overflow)   */}
+      {/* ======================================================== */}
+      <div className="bg-neutral-950 text-neutral-300 text-[10px] sm:text-[11px] tracking-wider uppercase py-2 px-4 border-b border-neutral-800">
+        <div className="max-w-7xl mx-auto flex items-center justify-between sm:justify-center gap-4 sm:gap-8 overflow-x-auto scrollbar-none whitespace-nowrap">
+          <button
+            onClick={onOpenSignIn}
+            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium"
+          >
+            Sign in
+          </button>
+          <span className="text-neutral-700 hidden sm:inline">•</span>
+          <button
+            onClick={onOpenTracking}
+            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium"
+          >
+            Tracking info
+          </button>
+          <span className="text-neutral-700 hidden sm:inline">•</span>
+          <button
+            onClick={() => onNotify('Complimentary luxury gift packaging on all orders')}
+            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium"
+          >
+            Gifting
+          </button>
+          <span className="text-neutral-700 hidden sm:inline">•</span>
+          <button
+            onClick={() => onNotify('E-Gift cards delivered directly to recipient inbox')}
+            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium"
+          >
+            Shop e-gift cards
+          </button>
+          <span className="text-neutral-700 hidden sm:inline">•</span>
+          <button
+            onClick={onOpenStoreLocator}
+            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1"
+          >
+            <MapPin className="w-3 h-3 text-neutral-400" />
+            <span>Stores</span>
+          </button>
+        </div>
       </div>
 
-      {/* Sticky Main Header */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-neutral-200 transition-all">
-        <div className="grid grid-cols-[auto_1fr_auto] md:grid-cols-3 items-center px-4 md:px-10 py-3.5 gap-2">
-          {/* Left Controls: Search, Stores */}
-          <div className="flex items-center gap-3 sm:gap-6">
+      {/* ======================================================== */}
+      {/* 2. MAIN HEADER (Zero Collision, 100% Exact Center Logo) */}
+      {/* Left: WOMEN, MEN, TEENS, FRAGRANCE & BEAUTY, admin panel  */}
+      {/* Center: [YOUR BRAND ]                                    */}
+      {/* Right: SEARCH, WISHLIST (with count), BAG (with count)    */}
+      {/* ======================================================== */}
+      <header className="sticky top-0 z-30 bg-white/98 backdrop-blur-md border-b border-neutral-200 transition-all shadow-xs">
+        {/* DESKTOP HEADER (grid-cols-[1fr_auto_1fr] guarantees center & zero overlap) */}
+        <div className="hidden lg:grid grid-cols-[1fr_auto_1fr] items-center px-6 xl:px-12 py-3.5 border-b border-neutral-200">
+          {/* LEFT SIDE: WOMEN, MEN, TEENS, FRAGRANCE & BEAUTY, admin panel */}
+          <div className="flex items-center gap-4 xl:gap-6 text-xs tracking-wider uppercase font-semibold text-neutral-800 min-w-0">
+            {/* WOMEN */}
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open mobile menu"
-              className="md:hidden p-1.5 -ml-1 text-neutral-800 hover:text-black flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider cursor-pointer"
+              onClick={() => {
+                onSelectDepartment('Woman');
+                onNotify('Viewing WOMEN collection');
+              }}
+              className={`py-1 cursor-pointer transition-all shrink-0 ${
+                currentDepartment === 'Woman'
+                  ? 'text-neutral-950 font-bold border-b-2 border-neutral-950 -mb-[2px]'
+                  : 'hover:text-black text-neutral-700'
+              }`}
             >
-              <Menu className="w-5 h-5" />
-              <span>Menu</span>
+              WOMEN
             </button>
 
+            {/* MEN */}
             <button
-              onClick={onOpenSearch}
-              className="flex items-center gap-1.5 sm:gap-2 text-xs font-medium uppercase tracking-wider text-neutral-800 hover:text-black group cursor-pointer"
+              onClick={() => {
+                onSelectDepartment('Man');
+                onNotify('Viewing MEN collection');
+              }}
+              className={`py-1 cursor-pointer transition-all shrink-0 ${
+                currentDepartment === 'Man'
+                  ? 'text-neutral-950 font-bold border-b-2 border-neutral-950 -mb-[2px]'
+                  : 'hover:text-black text-neutral-700'
+              }`}
             >
-              <Search className="w-4 h-4 text-neutral-600 group-hover:text-black transition-colors" />
-              <span className="inline">Search</span>
+              MEN
             </button>
 
+            {/* TEENS */}
             <button
-              onClick={onOpenStoreLocator}
-              className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-neutral-800 hover:text-black transition-colors cursor-pointer"
+              onClick={() => {
+                onSelectDepartment('Teens');
+                onNotify('Viewing TEENS collection');
+              }}
+              className={`py-1 cursor-pointer transition-all shrink-0 ${
+                currentDepartment === 'Teens'
+                  ? 'text-neutral-950 font-bold border-b-2 border-neutral-950 -mb-[2px]'
+                  : 'hover:text-black text-neutral-700'
+              }`}
             >
-              <MapPin className="w-3.5 h-3.5 text-neutral-600 hover:text-black" />
-              <span>Stores</span>
+              TEENS
+            </button>
+
+            {/* FRAGRANCE & BEAUTY */}
+            <button
+              onClick={() => {
+                onSelectDepartment('Fragrance & Beauty');
+                onNotify('Viewing FRAGRANCE & BEAUTY collection');
+              }}
+              className={`py-1 cursor-pointer transition-all shrink-0 ${
+                currentDepartment === 'Fragrance & Beauty'
+                  ? 'text-neutral-950 font-bold border-b-2 border-neutral-950 -mb-[2px]'
+                  : 'hover:text-black text-neutral-700'
+              }`}
+            >
+              <span className="hidden xl:inline">FRAGRANCE & </span>BEAUTY
+            </button>
+
+            {/* admin panel */}
+            <button
+              onClick={() => setAdminModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase transition-all bg-neutral-100 hover:bg-neutral-900 text-neutral-700 hover:text-white border border-neutral-300 hover:border-neutral-900 cursor-pointer shadow-2xs shrink-0"
+              title="Open Store Administration Dashboard"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <Shield className="w-3 h-3 text-amber-500" />
+              <span>admin panel</span>
             </button>
           </div>
 
-          {/* Center Brand Logo */}
-          <div className="text-center">
+          {/* CENTER: Exact Center Brand Logo / Name: [YOUR BRAND ] */}
+          <div className="flex items-center justify-center px-4 shrink-0">
             <a
               href="#"
               onClick={(e) => {
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="inline-block font-serif text-2xl md:text-3xl font-bold tracking-[0.18em] text-neutral-950 uppercase hover:opacity-90 transition-opacity"
+              className="font-serif text-2xl xl:text-3xl font-bold tracking-[0.18em] uppercase text-neutral-950 hover:opacity-85 transition-opacity whitespace-nowrap leading-none"
             >
               YOUR BRAND
             </a>
           </div>
 
-          {/* Right Controls: PKR, Wishlist, Bag */}
-          <div className="flex items-center justify-end gap-3 sm:gap-5 text-xs font-medium uppercase tracking-wider">
-            {/* Currency selector dropdown */}
-            <div className="relative">
+          {/* RIGHT SIDE: SEARCH, WISHLIST (with small circular badge), BAG (with small circular badge) */}
+          <div className="flex items-center justify-end gap-5 xl:gap-7 text-xs font-semibold uppercase tracking-wider text-neutral-900 min-w-0">
+            {/* Currency selector */}
+            <div className="relative shrink-0">
               <button
                 onClick={() => setCurrencyDropdownOpen(!currencyDropdownOpen)}
-                className="flex items-center gap-1 text-neutral-800 hover:text-black py-1 px-1.5 font-semibold cursor-pointer"
+                className="flex items-center gap-1 text-neutral-700 hover:text-black py-1 cursor-pointer font-medium"
               >
                 <span>{currency.code}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+                <ChevronDown className="w-3 h-3 text-neutral-400" />
               </button>
 
               {currencyDropdownOpen && (
-                <div className="absolute right-0 mt-1 w-28 bg-white border border-neutral-200 shadow-xl py-1 z-40">
+                <div className="absolute right-0 top-full mt-2 w-36 bg-white border border-neutral-200 shadow-xl py-1 z-50">
                   {currencies.map((c) => (
                     <button
                       key={c.code}
@@ -157,772 +226,770 @@ export const Navbar: React.FC<NavbarProps> = ({
                         onNotify(`Switched currency to ${c.code}`);
                       }}
                       className={`w-full text-left px-3 py-1.5 text-xs hover:bg-neutral-100 flex justify-between cursor-pointer ${
-                        currency.code === c.code ? 'font-bold bg-neutral-50' : ''
+                        currency.code === c.code ? 'font-bold bg-neutral-50 text-black' : 'text-neutral-700'
                       }`}
                     >
                       <span>{c.code}</span>
-                      <span className="text-neutral-400">{c.symbol}</span>
+                      <span className="text-neutral-400">{c.symbol.trim()}</span>
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* Wishlist Link */}
+            {/* SEARCH */}
+            <button
+              onClick={onOpenSearch}
+              className="flex items-center gap-1.5 text-neutral-800 hover:text-black transition-colors cursor-pointer shrink-0"
+            >
+              <Search className="w-3.5 h-3.5 text-neutral-600" />
+              <span>SEARCH</span>
+            </button>
+
+            {/* WISHLIST with small circular item-count badge */}
             <button
               onClick={onOpenWishlist}
-              className="flex items-center gap-1.5 text-neutral-800 hover:text-black py-1 cursor-pointer"
+              className="flex items-center gap-1.5 text-neutral-800 hover:text-black transition-colors cursor-pointer group shrink-0"
             >
-              <Heart className="w-4 h-4 text-neutral-700" />
-              <span className="hidden md:inline">Wishlist</span>
-              <span className="text-[11px] font-semibold bg-neutral-100 px-1.5 py-0.5 rounded-sm min-w-4 text-center">
+              <Heart className="w-3.5 h-3.5 text-neutral-600 group-hover:text-black transition-colors" />
+              <span>WISHLIST</span>
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-neutral-900 text-white text-[10px] font-bold leading-none group-hover:bg-black transition-colors shadow-2xs">
                 {wishlistCount}
               </span>
             </button>
 
-            {/* Bag / Cart Link */}
+            {/* BAG with small circular item-count badge */}
             <button
               onClick={onOpenCart}
-              className="flex items-center gap-1.5 bg-neutral-900 text-white hover:bg-black px-3 py-1.5 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-neutral-800 hover:text-black transition-colors cursor-pointer group shrink-0"
             >
-              <ShoppingBag className="w-4 h-4" />
-              <span className="hidden md:inline">Bag</span>
-              <span className="text-[11px] font-bold bg-white text-neutral-900 px-1.5 py-0.2 rounded-xs min-w-4 text-center">
+              <ShoppingBag className="w-3.5 h-3.5 text-neutral-600 group-hover:text-black transition-colors" />
+              <span>BAG</span>
+              <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-neutral-900 text-white text-[10px] font-bold leading-none group-hover:bg-black transition-colors shadow-2xs">
                 {cartCount}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Category Navigation Bar (Visible on all screens with horizontal scroll) */}
-        {currentDepartment === 'Man' ? (
-          <nav
-            aria-label="Men's categories"
-            className="flex justify-start md:justify-center items-center gap-4 sm:gap-6 lg:gap-8 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1 bg-white"
-          >
-            {/* Quick Department Switchers */}
-            <div className="flex items-center gap-3 sm:gap-4 border-r border-neutral-200 pr-4 mr-1 font-semibold text-neutral-500">
-              <button
-                onClick={() => onSelectDepartment('Woman')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Woman
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Teens')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Teens
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Fragrance & Beauty')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Fragrance & Beauty
-              </button>
-            </div>
+        {/* MOBILE & TABLET HEADER (Guarantees zero text collision/overflow) */}
+        <div className="lg:hidden relative flex items-center justify-between px-3 sm:px-5 py-3 border-b border-neutral-200">
+          {/* Left: Menu & Search */}
+          <div className="flex items-center gap-2 z-10">
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="flex items-center gap-1.5 p-1 text-xs font-semibold uppercase tracking-wider text-neutral-900 hover:text-black cursor-pointer"
+              aria-label="Open mobile menu"
+            >
+              <Menu className="w-5 h-5 text-neutral-900" />
+              <span className="text-[11px] font-bold">MENU</span>
+            </button>
 
-            <div className="py-2.5">
+            <button
+              onClick={onOpenSearch}
+              className="p-1.5 text-neutral-800 hover:text-black cursor-pointer"
+              aria-label="Search"
+            >
+              <Search className="w-4 h-4 text-neutral-800" />
+            </button>
+          </div>
+
+          {/* Center: EXACT CENTER BRAND LOGO: [YOUR BRAND ] */}
+          <div className="absolute left-1/2 -translate-x-1/2 z-10 flex items-center justify-center pointer-events-auto">
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="font-serif text-lg sm:text-xl font-bold tracking-[0.14em] uppercase text-neutral-950 truncate max-w-[170px] sm:max-w-none text-center"
+            >
+              YOUR BRAND
+            </a>
+          </div>
+
+          {/* Right: Admin icon, Wishlist, Bag with badges */}
+          <div className="flex items-center gap-1.5 sm:gap-2 z-10">
+            <button
+              onClick={() => setAdminModalOpen(true)}
+              className="p-1.5 text-neutral-700 hover:text-black cursor-pointer"
+              title="Admin Panel"
+              aria-label="Admin panel"
+            >
+              <Shield className="w-4 h-4 text-neutral-900" />
+            </button>
+
+            {/* Wishlist Icon with circular item-count badge */}
+            <button
+              onClick={onOpenWishlist}
+              className="relative p-1.5 text-neutral-800 hover:text-black cursor-pointer"
+              aria-label="Wishlist"
+            >
+              <Heart className="w-4 h-4 text-neutral-800" />
+              <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-neutral-900 text-white text-[9px] font-bold leading-none">
+                {wishlistCount}
+              </span>
+            </button>
+
+            {/* Bag Icon with circular item-count badge */}
+            <button
+              onClick={onOpenCart}
+              className="relative p-1.5 text-neutral-900 hover:text-black cursor-pointer"
+              aria-label="Shopping Bag"
+            >
+              <ShoppingBag className="w-4 h-4 text-neutral-900" />
+              <span className="absolute -top-0.5 -right-0.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-neutral-900 text-white text-[9px] font-bold leading-none">
+                {cartCount}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* ======================================================== */}
+        {/* MOBILE DEPARTMENT SELECTOR RAIL (1-Tap Switch, No Scroll Overlap) */}
+        {/* ======================================================== */}
+        <div className="lg:hidden border-b border-neutral-200 bg-white px-3 py-1.5 flex items-center gap-4 overflow-x-auto scrollbar-none whitespace-nowrap text-[11px] font-bold tracking-wider uppercase">
+          <button
+            onClick={() => {
+              onSelectDepartment('Woman');
+              onNotify('Viewing WOMEN collection');
+            }}
+            className={`py-1 cursor-pointer shrink-0 transition-colors ${
+              currentDepartment === 'Woman'
+                ? 'text-black border-b-2 border-black font-extrabold -mb-[7px]'
+                : 'text-neutral-500 hover:text-black'
+            }`}
+          >
+            WOMEN
+          </button>
+          <button
+            onClick={() => {
+              onSelectDepartment('Man');
+              onNotify('Viewing MEN collection');
+            }}
+            className={`py-1 cursor-pointer shrink-0 transition-colors ${
+              currentDepartment === 'Man'
+                ? 'text-black border-b-2 border-black font-extrabold -mb-[7px]'
+                : 'text-neutral-500 hover:text-black'
+            }`}
+          >
+            MEN
+          </button>
+          <button
+            onClick={() => {
+              onSelectDepartment('Teens');
+              onNotify('Viewing TEENS collection');
+            }}
+            className={`py-1 cursor-pointer shrink-0 transition-colors ${
+              currentDepartment === 'Teens'
+                ? 'text-black border-b-2 border-black font-extrabold -mb-[7px]'
+                : 'text-neutral-500 hover:text-black'
+            }`}
+          >
+            TEENS
+          </button>
+          <button
+            onClick={() => {
+              onSelectDepartment('Fragrance & Beauty');
+              onNotify('Viewing FRAGRANCE & BEAUTY collection');
+            }}
+            className={`py-1 cursor-pointer shrink-0 transition-colors ${
+              currentDepartment === 'Fragrance & Beauty'
+                ? 'text-black border-b-2 border-black font-extrabold -mb-[7px]'
+                : 'text-neutral-500 hover:text-black'
+            }`}
+          >
+            FRAGRANCE & BEAUTY
+          </button>
+          <button
+            onClick={() => setAdminModalOpen(true)}
+            className="py-1 cursor-pointer shrink-0 text-amber-700 font-bold flex items-center gap-1"
+          >
+            <Shield className="w-3 h-3 text-amber-600" />
+            <span>ADMIN</span>
+          </button>
+        </div>
+
+        {/* ======================================================== */}
+        {/* 3. ROW 3: SUB-NAVIGATION BAR (Tailored to active dept)   */}
+        {/* ======================================================== */}
+        <nav
+          aria-label="Department categories"
+          className="flex justify-start md:justify-center items-center gap-4 sm:gap-6 lg:gap-8 text-xs font-medium uppercase tracking-wider relative px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1 bg-white border-b border-neutral-100"
+        >
+          {currentDepartment === 'Man' ? (
+            <>
               <button
                 onClick={() => handleNavClick('New in')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                New in
+                NEW IN
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('KAMEEZ SHALWAR')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Kameez Shalwar
+                KAMEEZ SHALWAR
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('KURTA TROUSER')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Kurta Trouser
+                KURTA TROUSER
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('WAISTCOAT')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Waistcoat
+                WAISTCOAT
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('UNSTITCHED')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Unstitched
+                UNSTITCHED
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('FORMAL KURTA')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Formal Kurta
+                FORMAL KURTA
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('FOOTWEAR')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Footwear
+                FOOTWEAR
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Sale')}
-                className="text-red-700 font-semibold hover:text-red-800 transition-colors cursor-pointer"
+                className="text-red-700 font-bold hover:text-red-800 transition-colors cursor-pointer py-2"
               >
-                Sale
+                SALE
               </button>
-            </div>
-          </nav>
-        ) : currentDepartment === 'Teens' ? (
-          <nav
-            aria-label="Teens categories"
-            className="flex justify-start md:justify-center items-center gap-4 sm:gap-6 lg:gap-8 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1 bg-white"
-          >
-            {/* Quick Department Switchers */}
-            <div className="flex items-center gap-3 sm:gap-4 border-r border-neutral-200 pr-4 mr-1 font-semibold text-neutral-500">
-              <button
-                onClick={() => onSelectDepartment('Woman')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Woman
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Man')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Man
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Fragrance & Beauty')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Fragrance & Beauty
-              </button>
-            </div>
-
-            <div className="py-2.5">
+            </>
+          ) : currentDepartment === 'Teens' ? (
+            <>
               <button
                 onClick={() => handleNavClick('Summer 26')}
-                className="font-bold text-amber-600 hover:text-amber-700 transition-colors cursor-pointer flex items-center gap-1"
+                className="font-bold text-amber-600 hover:text-amber-700 transition-colors cursor-pointer py-2"
               >
-                <span>Summer '26</span>
+                SUMMER '26
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Teen Girls')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Teen Girls
+                TEEN GIRLS
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Teen Boys')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Teen Boys
+                TEEN BOYS
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Kid Girls')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Kid Girls
+                KID GIRLS
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Kid Boys')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Kid Boys
+                KID BOYS
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Infant')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Infant
+                INFANT
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Trending')}
-                className="hover:text-black text-neutral-900 font-semibold transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-900 font-semibold transition-colors cursor-pointer py-2"
               >
-                Trending
+                TRENDING
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Sale')}
-                className="text-red-700 font-semibold hover:text-red-800 transition-colors cursor-pointer"
+                className="text-red-700 font-bold hover:text-red-800 transition-colors cursor-pointer py-2"
               >
-                Sale
+                SALE
               </button>
-            </div>
-          </nav>
-        ) : currentDepartment === 'Fragrance & Beauty' ? (
-          <nav
-            aria-label="Fragrance and Beauty categories"
-            className="flex justify-start md:justify-center items-center gap-4 sm:gap-6 lg:gap-8 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1 bg-white"
-          >
-            {/* Quick Department Switchers */}
-            <div className="flex items-center gap-3 sm:gap-4 border-r border-neutral-200 pr-4 mr-1">
-              <button
-                onClick={() => onSelectDepartment('Woman')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Woman
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Man')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Man
-              </button>
-              <button
-                onClick={() => onSelectDepartment('Teens')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
-              >
-                Teens
-              </button>
-            </div>
-
-            <div className="py-2.5">
+            </>
+          ) : currentDepartment === 'Fragrance & Beauty' ? (
+            <>
               <button
                 onClick={() => handleNavClick('All')}
-                className="hover:text-black text-neutral-900 font-semibold transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-900 font-semibold transition-colors cursor-pointer py-2"
               >
-                Discover All
+                DISCOVER ALL
               </button>
-            </div>
-            <div
-              className="py-2.5 relative group"
-              onMouseEnter={() => setFragranceMegaOpen(true)}
-            >
-              <button
-                onClick={() => {
-                  handleNavClick('Fragrances');
-                  setFragranceMegaOpen(true);
-                }}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setFragranceMegaOpen(true)}
               >
-                <span>Fragrances</span>
-                <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
-              </button>
-            </div>
-            <div
-              className="py-2.5 relative group"
-              onMouseEnter={() => setFragranceMegaOpen(true)}
-            >
-              <button
-                onClick={() => {
-                  handleNavClick('Makeup');
-                  setFragranceMegaOpen(true);
-                }}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+                <button
+                  onClick={() => {
+                    handleNavClick('Fragrances');
+                    setFragranceMegaOpen(true);
+                  }}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>FRAGRANCES</span>
+                  <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
+                </button>
+              </div>
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setFragranceMegaOpen(true)}
               >
-                <span>Makeup</span>
-                <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
-              </button>
-            </div>
-            <div
-              className="py-2.5 relative group"
-              onMouseEnter={() => setFragranceMegaOpen(true)}
-            >
-              <button
-                onClick={() => {
-                  handleNavClick('Skin Care');
-                  setFragranceMegaOpen(true);
-                }}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+                <button
+                  onClick={() => {
+                    handleNavClick('Makeup');
+                    setFragranceMegaOpen(true);
+                  }}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>MAKEUP</span>
+                  <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
+                </button>
+              </div>
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setFragranceMegaOpen(true)}
               >
-                <span>Skin Care</span>
-                <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
-              </button>
-            </div>
-            <div className="py-2.5">
+                <button
+                  onClick={() => {
+                    handleNavClick('Skin Care');
+                    setFragranceMegaOpen(true);
+                  }}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <span>SKIN CARE</span>
+                  <ChevronDown className="w-3 h-3 text-neutral-400 group-hover:text-black" />
+                </button>
+              </div>
               <button
                 onClick={() => handleNavClick('Body & Home')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Body & Home
+                BODY & HOME
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Bakhoor')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Bakhoor
+                BAKHOOR
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Scented Candle')}
-                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Candles
+                CANDLES
               </button>
-            </div>
-            <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Sale')}
-                className="text-red-700 font-semibold hover:text-red-800 transition-colors cursor-pointer"
+                className="text-red-700 font-bold hover:text-red-800 transition-colors cursor-pointer py-2"
               >
-                Offers & Sale
+                OFFERS & SALE
               </button>
-            </div>
-          </nav>
-        ) : (
-          <nav
-            aria-label="Women's categories"
-            className="flex justify-start md:justify-center items-center gap-4 sm:gap-6 lg:gap-8 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1 bg-white"
-          >
-            {/* Quick Department Switchers */}
-            <div className="flex items-center gap-3 sm:gap-4 border-r border-neutral-200 pr-4 mr-1 font-semibold text-neutral-500">
+            </>
+          ) : (
+            /* Women categories */
+            <>
               <button
-                onClick={() => onSelectDepartment('Man')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
+                onClick={() => handleNavClick('New in')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Man
+                NEW IN
               </button>
+
+              {/* Ready to wear */}
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setActiveMegaMenu('rtw')}
+                onMouseLeave={() => setActiveMegaMenu(null)}
+              >
+                <button
+                  onClick={() => handleNavClick('Ready to wear')}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                >
+                  READY TO WEAR
+                </button>
+
+                {/* Mega Menu with w-full max-w-5xl (zero screen scrollbar overflow!) */}
+                {activeMegaMenu === 'rtw' && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-[min(90vw,1024px)] bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-4 gap-8 z-50 text-left normal-case tracking-normal">
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Shop by type
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Co-ords')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Co-ords
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Kurta')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Kurta
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('3 piece stitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            3 piece stitched
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Dresses')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Dresses & Kaftans
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Fabric
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Lawn')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Lawn
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Raw silk')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Raw silk
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Cotton')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Cotton
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Chiffon')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Chiffon
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Collections
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Essentials')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Essentials
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Luxe')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Luxe
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Signature')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Signature
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-neutral-50 p-4 border border-neutral-200/80">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-2 text-neutral-900">
+                        Featured
+                      </h4>
+                      <p className="text-xs text-neutral-600 mb-3">
+                        Pre-winter edit in rich textures and warm tones.
+                      </p>
+                      <button
+                        onClick={() => handleNavClick('Pre-winter edit')}
+                        className="text-xs font-semibold text-neutral-950 underline cursor-pointer"
+                      >
+                        Explore Edit &rarr;
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Unstitched */}
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setActiveMegaMenu('uns')}
+                onMouseLeave={() => setActiveMegaMenu(null)}
+              >
+                <button
+                  onClick={() => handleNavClick('Unstitched')}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                >
+                  UNSTITCHED
+                </button>
+
+                {activeMegaMenu === 'uns' && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-[min(90vw,1024px)] bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-4 gap-8 z-50 text-left normal-case tracking-normal">
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Shop by type
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('1 piece unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            1 piece
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('2 piece unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            2 piece
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('3 piece unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            3 piece
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Fabric
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Lawn unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Lawn
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Khaddar unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Khaddar
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Karandi unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Karandi
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Collections
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Signature unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Signature Prints
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Winter Velvet Unstitched')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Velvet Shawl Edit
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-neutral-50 p-4 border border-neutral-200/80">
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-2 text-neutral-900">
+                        Noya Collection
+                      </h4>
+                      <p className="text-xs text-neutral-600 mb-3">
+                        Hand-finished detail and timeless patterns.
+                      </p>
+                      <button
+                        onClick={() => handleNavClick('Noya unstitched')}
+                        className="text-xs font-semibold text-neutral-950 underline cursor-pointer"
+                      >
+                        View Noya &rarr;
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Formals */}
               <button
-                onClick={() => onSelectDepartment('Teens')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
+                onClick={() => handleNavClick('Formals')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Teens
+                FORMALS
               </button>
+
+              {/* Footwear */}
               <button
-                onClick={() => onSelectDepartment('Fragrance & Beauty')}
-                className="text-neutral-500 hover:text-black transition-colors cursor-pointer"
+                onClick={() => handleNavClick('Footwear')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer py-2"
               >
-                Fragrance & Beauty
+                FOOTWEAR
               </button>
-            </div>
 
-            {/* New in */}
-          <div
-            className="py-2.5 relative group"
-            onMouseEnter={() => setActiveMegaMenu('new')}
-            onMouseLeave={() => setActiveMegaMenu(null)}
-          >
-            <button
-              onClick={() => handleNavClick('New in')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              New in
-            </button>
-          </div>
+              {/* Accessories */}
+              <div
+                className="py-2 relative group cursor-pointer"
+                onMouseEnter={() => setActiveMegaMenu('acc')}
+                onMouseLeave={() => setActiveMegaMenu(null)}
+              >
+                <button
+                  onClick={() => handleNavClick('Accessories')}
+                  className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
+                >
+                  ACCESSORIES
+                </button>
 
-          {/* Ready to wear */}
-          <div
-            className="py-2.5 relative group"
-            onMouseEnter={() => setActiveMegaMenu('rtw')}
-            onMouseLeave={() => setActiveMegaMenu(null)}
-          >
-            <button
-              onClick={() => handleNavClick('Ready to wear')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Ready to wear
-            </button>
-
-            {/* Mega Menu */}
-            {activeMegaMenu === 'rtw' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-screen max-w-5xl bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-4 gap-8 z-40 text-left normal-case tracking-normal">
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Shop by type
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Co-ords')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Co-ords
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Kurta')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Kurta
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('3 piece stitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        3 piece stitched
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Dresses')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Dresses & Kaftans
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Fabric
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Lawn')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Lawn
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Raw silk')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Raw silk
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Cotton')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Cotton
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Chiffon')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Chiffon
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Collections
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Essentials')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Essentials
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Luxe')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Luxe
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Signature')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Signature
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div className="bg-neutral-50 p-4 border border-neutral-200/80">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-2 text-neutral-900">
-                    Featured
-                  </h4>
-                  <p className="text-xs text-neutral-600 mb-3">
-                    Pre-winter edit in rich textures and warm tones.
-                  </p>
-                  <button
-                    onClick={() => handleNavClick('Pre-winter edit')}
-                    className="text-xs font-semibold text-neutral-950 underline"
-                  >
-                    Explore Edit &rarr;
-                  </button>
-                </div>
+                {activeMegaMenu === 'acc' && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 w-[min(90vw,768px)] bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-3 gap-8 z-50 text-left normal-case tracking-normal">
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Bags
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Totes')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Totes
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Clutches')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Evening Clutches
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Jewellery
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Artisanal')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Artisanal Filigree
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Earrings')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Jhumkas & Tops
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
+                        Extras
+                      </h4>
+                      <ul className="space-y-2 text-xs text-neutral-600">
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Scarves')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Silk Scarves
+                          </button>
+                        </li>
+                        <li>
+                          <button
+                            onClick={() => handleNavClick('Wallets')}
+                            className="hover:text-black hover:underline cursor-pointer"
+                          >
+                            Cardholders
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          {/* Unstitched */}
-          <div
-            className="py-2.5 relative group"
-            onMouseEnter={() => setActiveMegaMenu('uns')}
-            onMouseLeave={() => setActiveMegaMenu(null)}
-          >
-            <button
-              onClick={() => handleNavClick('Unstitched')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Unstitched
-            </button>
+              {/* S Y N C C */}
+              <button
+                onClick={() => handleNavClick('Trending')}
+                className="hover:text-black text-neutral-800 transition-colors cursor-pointer py-2 tracking-[0.25em] font-semibold"
+              >
+                S Y N C C
+              </button>
 
-            {activeMegaMenu === 'uns' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-screen max-w-5xl bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-4 gap-8 z-40 text-left normal-case tracking-normal">
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Shop by type
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('1 piece unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        1 piece
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('2 piece unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        2 piece
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('3 piece unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        3 piece
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Fabric
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Lawn unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Lawn
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Khaddar unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Khaddar
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Karandi unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Karandi
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Collections
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Signature unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Signature Prints
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Winter Velvet Unstitched')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Velvet Shawl Edit
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div className="bg-neutral-50 p-4 border border-neutral-200/80">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-2 text-neutral-900">
-                    Noya Collection
-                  </h4>
-                  <p className="text-xs text-neutral-600 mb-3">
-                    Hand-finished detail and timeless patterns.
-                  </p>
-                  <button
-                    onClick={() => handleNavClick('Noya unstitched')}
-                    className="text-xs font-semibold text-neutral-950 underline"
-                  >
-                    View Noya &rarr;
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Formals */}
-          <div className="py-2.5">
-            <button
-              onClick={() => handleNavClick('Formals')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Formals
-            </button>
-          </div>
-
-          {/* Footwear */}
-          <div className="py-2.5">
-            <button
-              onClick={() => handleNavClick('Footwear')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Footwear
-            </button>
-          </div>
-
-          {/* Accessories */}
-          <div
-            className="py-2.5 relative group"
-            onMouseEnter={() => setActiveMegaMenu('acc')}
-            onMouseLeave={() => setActiveMegaMenu(null)}
-          >
-            <button
-              onClick={() => handleNavClick('Accessories')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Accessories
-            </button>
-
-            {activeMegaMenu === 'acc' && (
-              <div className="absolute top-full left-1/2 -translate-x-1/2 w-screen max-w-3xl bg-white border border-neutral-200 shadow-2xl p-8 grid grid-cols-3 gap-8 z-40 text-left normal-case tracking-normal">
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Bags
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Totes')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Totes
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Clutches')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Evening Clutches
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Jewellery
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Artisanal')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Artisanal Filigree
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Earrings')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Jhumkas & Tops
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider mb-3 text-neutral-900 border-b border-neutral-200 pb-1.5">
-                    Extras
-                  </h4>
-                  <ul className="space-y-2 text-xs text-neutral-600">
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Scarves')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Silk Scarves
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => handleNavClick('Wallets')}
-                        className="hover:text-black hover:underline"
-                      >
-                        Cardholders
-                      </button>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Trending */}
-          <div className="py-2.5">
-            <button
-              onClick={() => handleNavClick('Trending')}
-              className="hover:text-black text-neutral-700 transition-colors"
-            >
-              Trending
-            </button>
-          </div>
-
-          {/* Sale */}
-          <div className="py-2.5">
-            <button
-              onClick={() => handleNavClick('Sale')}
-              className="text-red-700 font-semibold hover:text-red-800 transition-colors"
-            >
-              Sale
-            </button>
-          </div>
+              {/* Sale */}
+              <button
+                onClick={() => handleNavClick('Sale')}
+                className="text-red-700 font-bold hover:text-red-800 transition-colors cursor-pointer py-2"
+              >
+                SALE
+              </button>
+            </>
+          )}
         </nav>
-        )}
 
         {/* Fragrance & Beauty Luxury Mega Menu */}
         <FragranceMegaMenu
@@ -935,7 +1002,9 @@ export const Navbar: React.FC<NavbarProps> = ({
         />
       </header>
 
-      {/* Mobile Slide-out Navigation Drawer */}
+      {/* ======================================================== */}
+      {/* 4. MOBILE SLIDE-OUT DRAWER MENU (Zero Overflow)          */}
+      {/* ======================================================== */}
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 flex">
           {/* Backdrop */}
@@ -953,14 +1022,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </span>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
-                  className="p-1.5 text-neutral-600 hover:text-black"
+                  className="p-1.5 text-neutral-600 hover:text-black cursor-pointer"
                   aria-label="Close menu"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
 
-              {/* Department horizontal selector for mobile */}
+              {/* Department horizontal selector inside drawer */}
               <div className="p-3 bg-neutral-50 flex gap-2 overflow-x-auto border-b border-neutral-200 scrollbar-none">
                 {departments.map((dept) => (
                   <button
@@ -969,15 +1038,25 @@ export const Navbar: React.FC<NavbarProps> = ({
                       onSelectDepartment(dept);
                       setMobileMenuOpen(false);
                     }}
-                    className={`text-xs px-2.5 py-1 uppercase whitespace-nowrap font-medium transition-colors ${
+                    className={`text-xs px-2.5 py-1 uppercase whitespace-nowrap font-semibold transition-colors cursor-pointer ${
                       currentDepartment === dept
                         ? 'bg-neutral-900 text-white'
-                        : 'bg-white text-neutral-700 border border-neutral-200'
+                        : 'bg-white text-neutral-700 border border-neutral-200 hover:bg-neutral-100'
                     }`}
                   >
-                    {dept}
+                    {dept === 'Woman' ? 'WOMEN' : dept === 'Man' ? 'MEN' : dept}
                   </button>
                 ))}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setAdminModalOpen(true);
+                  }}
+                  className="text-xs px-2.5 py-1 uppercase whitespace-nowrap font-semibold bg-amber-100 text-amber-900 border border-amber-300 hover:bg-amber-200 transition-colors flex items-center gap-1 cursor-pointer"
+                >
+                  <Shield className="w-3 h-3 text-amber-700" />
+                  <span>Admin</span>
+                </button>
               </div>
 
               {/* Category Links */}
@@ -1033,7 +1112,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <button
                     key={item}
                     onClick={() => handleNavClick(item)}
-                    className={`w-full text-left px-5 py-3.5 flex justify-between items-center transition-colors ${
+                    className={`w-full text-left px-5 py-3.5 flex justify-between items-center transition-colors cursor-pointer ${
                       item === 'Sale'
                         ? 'text-red-700 font-bold hover:bg-red-50'
                         : 'text-neutral-800 hover:bg-neutral-50'
@@ -1047,7 +1126,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
 
             {/* Bottom helper actions */}
-            <div className="p-5 border-t border-neutral-200 bg-neutral-50 space-y-3">
+            <div className="p-4 border-t border-neutral-200 bg-neutral-50 space-y-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-neutral-500 uppercase font-medium">Currency</span>
                 <select
@@ -1056,7 +1135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     const found = currencies.find((c) => c.code === e.target.value);
                     if (found) onSelectCurrency(found);
                   }}
-                  className="bg-white border border-neutral-300 rounded px-2 py-1 text-xs uppercase"
+                  className="bg-white border border-neutral-300 rounded px-2 py-1 text-xs uppercase cursor-pointer"
                 >
                   {currencies.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -1066,13 +1145,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </select>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 pt-2">
+              <div className="grid grid-cols-2 gap-2 pt-1">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
                     onOpenSignIn();
                   }}
-                  className="w-full py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider font-medium text-center"
+                  className="w-full py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider font-medium text-center cursor-pointer hover:bg-black transition-colors"
                 >
                   Sign in
                 </button>
@@ -1081,7 +1160,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     setMobileMenuOpen(false);
                     onOpenTracking();
                   }}
-                  className="w-full py-2 border border-neutral-300 bg-white text-neutral-800 text-xs uppercase tracking-wider font-medium text-center"
+                  className="w-full py-2 border border-neutral-300 bg-white text-neutral-800 text-xs uppercase tracking-wider font-medium text-center cursor-pointer hover:bg-neutral-100 transition-colors"
                 >
                   Track Order
                 </button>
@@ -1090,6 +1169,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       )}
+
+      {/* Admin Panel Modal */}
+      <AdminPanelModal
+        isOpen={adminModalOpen}
+        onClose={() => setAdminModalOpen(false)}
+        currentDepartment={currentDepartment}
+        onSelectDepartment={onSelectDepartment}
+        currency={currency}
+        onNotify={onNotify}
+      />
     </>
   );
 };
