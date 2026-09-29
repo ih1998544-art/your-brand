@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Heart, ShoppingBag, Ruler, Truck, ShieldCheck, Check } from 'lucide-react';
+import { X, Heart, ShoppingBag, Ruler, Truck, ShieldCheck, Check, ChevronLeft, ChevronRight, Layers, ZoomIn } from 'lucide-react';
 import { Product, Currency } from '../types';
 import { VectorFashionArt } from './VectorFashionArt';
 
@@ -23,17 +23,38 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState<number>(1);
   const [showSizeGuide, setShowSizeGuide] = useState<boolean>(false);
+  const [activePhotoIndex, setActivePhotoIndex] = useState<number>(0);
+  const [isZoomed, setIsZoomed] = useState<boolean>(false);
 
-  // Reset size, quantity, and guide on product change
+  // Reset size, quantity, photo and guide on product change
   React.useEffect(() => {
     if (product) {
       setSelectedSize(product.sizes[0]);
       setQuantity(1);
       setShowSizeGuide(false);
+      setActivePhotoIndex(0);
+      setIsZoomed(false);
     }
   }, [product?.id]);
 
   if (!product) return null;
+
+  const galleryImages: string[] =
+    product.images && product.images.length > 0
+      ? product.images
+      : product.imageUrl
+      ? [product.imageUrl]
+      : [];
+
+  const currentDisplayImage = galleryImages[activePhotoIndex] || product.imageUrl;
+
+  const nextPhoto = () => {
+    setActivePhotoIndex((prev) => (prev + 1) % galleryImages.length);
+  };
+
+  const prevPhoto = () => {
+    setActivePhotoIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
+  };
 
   // Safe active size guaranteed to be valid for current product
   const activeSize =
@@ -74,36 +95,115 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
           <X className="w-4 h-4" />
         </button>
 
-        {/* Left Visual Column */}
-        <div className="w-full md:w-1/2 aspect-[3/4] md:aspect-auto md:min-h-[480px] bg-neutral-100 relative overflow-hidden shrink-0">
-          {product.imageUrl ? (
-            <img
-              src={product.imageUrl}
-              alt={product.name}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover object-center"
-            />
-          ) : (
-            <VectorFashionArt
-              artKey={product.categoryKey}
-              colorPalette={product.colorPalette}
-              className="w-full h-full object-cover"
-            />
-          )}
+        {/* Left Visual Column: Interactive Multi-Photo Gallery */}
+        <div className="w-full md:w-1/2 flex flex-col bg-neutral-100 relative shrink-0">
+          {/* Main Photo Display */}
+          <div className="relative aspect-[3/4] md:aspect-auto md:flex-1 min-h-[380px] md:min-h-[440px] overflow-hidden bg-neutral-100 group">
+            {currentDisplayImage ? (
+              <img
+                src={currentDisplayImage}
+                alt={`${product.name} view ${activePhotoIndex + 1}`}
+                referrerPolicy="no-referrer"
+                onClick={() => setIsZoomed(!isZoomed)}
+                className={`w-full h-full object-cover object-center transition-transform duration-500 cursor-zoom-in ${
+                  isZoomed ? 'scale-150 cursor-zoom-out' : 'group-hover:scale-103'
+                }`}
+              />
+            ) : (
+              <VectorFashionArt
+                artKey={product.categoryKey}
+                colorPalette={product.colorPalette}
+                className="w-full h-full object-cover"
+              />
+            )}
 
-          {/* Badges */}
-          <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5">
-            {product.isNew && (
-              <span className="bg-neutral-900 text-white text-xs font-semibold uppercase tracking-wider px-2.5 py-1 shadow-sm">
-                New in
-              </span>
+            {/* Badges */}
+            <div className="absolute top-4 left-4 z-10 flex flex-col gap-1.5 pointer-events-none">
+              {product.isNew && (
+                <span className="bg-neutral-900 text-white text-xs font-semibold uppercase tracking-wider px-2.5 py-1 shadow-sm">
+                  New in
+                </span>
+              )}
+              {hasDiscount && (
+                <span className="bg-red-700 text-white text-xs font-semibold uppercase tracking-wider px-2.5 py-1 shadow-sm">
+                  Sale
+                </span>
+              )}
+            </div>
+
+            {/* Gallery Photo Counter Badge */}
+            {galleryImages.length > 1 && (
+              <div className="absolute top-4 right-12 z-10 flex items-center gap-1.5 bg-black/60 backdrop-blur-xs text-white text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full">
+                <Layers className="w-3 h-3 text-amber-300" />
+                <span>Photo {activePhotoIndex + 1} of {galleryImages.length}</span>
+              </div>
             )}
-            {hasDiscount && (
-              <span className="bg-red-700 text-white text-xs font-semibold uppercase tracking-wider px-2.5 py-1 shadow-sm">
-                Sale
-              </span>
+
+            {/* Next / Prev Navigation Chevrons */}
+            {galleryImages.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevPhoto();
+                  }}
+                  aria-label="Previous photo angle"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/85 hover:bg-white text-neutral-900 shadow-md flex items-center justify-center transition-all opacity-80 hover:opacity-100 active:scale-95"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextPhoto();
+                  }}
+                  aria-label="Next photo angle"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-white/85 hover:bg-white text-neutral-900 shadow-md flex items-center justify-center transition-all opacity-80 hover:opacity-100 active:scale-95"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </>
             )}
+
+            {/* Zoom Hint */}
+            <div className="absolute bottom-3 right-3 z-10 bg-black/50 backdrop-blur-xs text-white text-[10px] px-2 py-0.5 rounded-xs pointer-events-none flex items-center gap-1 opacity-70">
+              <ZoomIn className="w-3 h-3" />
+              <span>{isZoomed ? 'Click to reset' : 'Click to zoom'}</span>
+            </div>
           </div>
+
+          {/* Thumbnail Strip */}
+          {galleryImages.length > 1 && (
+            <div className="p-3 bg-neutral-900/90 border-t border-neutral-800 flex items-center gap-2 overflow-x-auto">
+              <span className="text-[10px] uppercase tracking-wider text-neutral-400 shrink-0 font-medium px-1">
+                Views:
+              </span>
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setActivePhotoIndex(idx);
+                    setIsZoomed(false);
+                  }}
+                  className={`relative w-12 h-14 rounded-xs overflow-hidden border-2 shrink-0 transition-all ${
+                    activePhotoIndex === idx
+                      ? 'border-amber-400 ring-2 ring-amber-400/50 scale-105'
+                      : 'border-neutral-700 opacity-60 hover:opacity-100'
+                  }`}
+                  aria-label={`Switch to photo ${idx + 1}`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[8px] text-white text-center">
+                    #{idx + 1}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right Details Column */}

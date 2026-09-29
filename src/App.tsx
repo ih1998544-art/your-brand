@@ -160,29 +160,97 @@ export default function App() {
     if (currentDepartment === 'Man') {
       return PRODUCTS.filter((p) => p.department === 'Man');
     }
-    return PRODUCTS.filter((p) => p.id.startsWith('rail-'));
+    return PRODUCTS.filter(
+      (p) => p.department === 'Woman' && (p.categorySlug === 'trending' || p.tab === 'trending')
+    );
   }, [currentDepartment]);
 
   const totalCartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   const handleShopCategory = (categoryName: string) => {
     notify(`Browsing collection: ${categoryName}`);
-    const lower = categoryName.toLowerCase();
-    if (lower === 'ready to wear') {
-      setTrendingTab('rtw');
-      setActiveCategoryFilter(null);
-    } else if (
-      lower.includes('unstitched') ||
-      lower.includes('boski') ||
-      lower.includes('latha')
-    ) {
-      setTrendingTab('uns');
-      setActiveCategoryFilter(null);
-    } else if (lower === 'formals') {
-      setTrendingTab('frm');
-      setActiveCategoryFilter(null);
+    const lower = categoryName.toLowerCase().trim();
+
+    if (currentDepartment === 'Man') {
+      if (lower === 'new in' || lower === 'new') {
+        setTrendingTab('men_new');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('kameez') || lower.includes('shalwar')) {
+        setTrendingTab('men_ks');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('trouser') || (lower.includes('kurta') && !lower.includes('formal'))) {
+        setTrendingTab('men_kt');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('waistcoat')) {
+        setTrendingTab('men_wc');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('unstitched') || lower.includes('boski') || lower.includes('latha')) {
+        setTrendingTab('men_uns');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('formal') || lower.includes('sherwani') || lower.includes('prince')) {
+        setTrendingTab('men_fk');
+        setActiveCategoryFilter(null);
+      } else if (
+        lower.includes('footwear') ||
+        lower.includes('shoe') ||
+        lower.includes('chappal') ||
+        lower.includes('kaptaan') ||
+        lower.includes('peshawari') ||
+        lower.includes('zalmi')
+      ) {
+        setTrendingTab('men_fw');
+        setActiveCategoryFilter(null);
+      } else if (lower === 'sale') {
+        setTrendingTab('men_sale');
+        setActiveCategoryFilter(null);
+      } else {
+        setActiveCategoryFilter(categoryName);
+      }
     } else {
-      setActiveCategoryFilter(categoryName);
+      if (lower === 'new in' || lower === 'new') {
+        setTrendingTab('new');
+        setActiveCategoryFilter(null);
+      } else if (lower === 'ready to wear' || lower === 'rtw') {
+        setTrendingTab('rtw');
+        setActiveCategoryFilter(null);
+      } else if (
+        lower.includes('unstitched') ||
+        lower.includes('boski') ||
+        lower.includes('latha')
+      ) {
+        setTrendingTab('uns');
+        setActiveCategoryFilter(null);
+      } else if (lower.includes('formal') || lower.includes('peshwas') || lower.includes('gown')) {
+        setTrendingTab('frm');
+        setActiveCategoryFilter(null);
+      } else if (
+        lower.includes('footwear') ||
+        lower.includes('shoe') ||
+        lower.includes('khussa') ||
+        lower.includes('kolhapuri') ||
+        lower.includes('chappal') ||
+        lower.includes('mule')
+      ) {
+        setTrendingTab('footwear');
+        setActiveCategoryFilter(null);
+      } else if (
+        lower.includes('accessories') ||
+        lower.includes('bag') ||
+        lower.includes('jewel') ||
+        lower.includes('clutch') ||
+        lower.includes('scarf')
+      ) {
+        setTrendingTab('accessories');
+        setActiveCategoryFilter(null);
+      } else if (lower === 'trending') {
+        setTrendingTab('trending');
+        setActiveCategoryFilter(null);
+      } else if (lower === 'sale') {
+        setTrendingTab('sale');
+        setActiveCategoryFilter(null);
+      } else {
+        setActiveCategoryFilter(categoryName);
+      }
     }
     // Scroll smoothly to Trending section
     const elem = document.getElementById('trending-section');
@@ -199,6 +267,7 @@ export default function App() {
         onSelectDepartment={(dept) => {
           setCurrentDepartment(dept);
           setActiveCategoryFilter(null);
+          setTrendingTab(dept === 'Man' ? 'men_new' : 'new');
           notify(`Switched department to ${dept}`);
         }}
         currency={selectedCurrency}
@@ -231,6 +300,7 @@ export default function App() {
         <div id="trending-section">
           <TrendingSection
             products={departmentProducts}
+            department={currentDepartment}
             currency={selectedCurrency}
             wishlistIds={wishlistIds}
             onToggleWishlist={handleToggleWishlist}

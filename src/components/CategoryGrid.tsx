@@ -17,50 +17,71 @@ interface CategoryItem {
 
 const WOMEN_CATEGORIES: CategoryItem[] = [
   {
-    id: 'cat-1',
-    name: 'Pre-Winter Couture',
-    artKey: 'gown',
-    colors: '#3a2f4a,#7d5a86,#e9c9f0',
-    imageUrl: '/src/assets/images/women_velvet_peshwas_couture_1790621946851.jpg',
+    id: 'cat-new',
+    name: 'New in',
+    artKey: 'coord',
+    colors: '#581845,#900C3F,#FFF0F5',
+    imageUrl: '/src/assets/images/mannequin_plum_embroidered_1790645171231.jpg',
   },
   {
-    id: 'cat-2',
+    id: 'cat-rtw',
     name: 'Ready to wear',
     artKey: 'kurta',
     colors: '#2f5d50,#8fb9a0,#f2efe4',
     imageUrl: '/src/assets/images/pk_girl_readytowear_1790618208513.jpg',
   },
   {
-    id: 'cat-3',
+    id: 'cat-uns',
     name: 'Unstitched',
     artKey: 'dupatta',
     colors: '#7a2e3b,#d98a8a,#ffe4d6',
     imageUrl: '/src/assets/images/pk_girl_unstitched_1790618224088.jpg',
   },
   {
-    id: 'cat-4',
+    id: 'cat-frm',
     name: 'Formals',
     artKey: 'gown',
     colors: '#1d2b4a,#4d6fae,#dfe8ff',
-    imageUrl: '/src/assets/images/pk_girl_formals_1790618240981.jpg',
+    imageUrl: '/src/assets/images/mannequin_maroon_velvet_1790645307280.jpg',
   },
   {
-    id: 'cat-5',
+    id: 'cat-fw',
     name: 'Footwear',
     artKey: 'bag',
     colors: '#831843,#d4af37,#fdf2f8',
     imageUrl: '/src/assets/images/women_khussa_footwear_1790621932657.jpg',
   },
   {
-    id: 'cat-6',
+    id: 'cat-acc',
     name: 'Accessories',
     artKey: 'bag',
     colors: '#5b4636,#c8a27a,#fff3e2',
-    imageUrl: '/src/assets/images/bag_luxury_only_1790618153318.jpg',
+    imageUrl: '/src/assets/images/accessories_tote_leather_1790645157345.jpg',
+  },
+  {
+    id: 'cat-trn',
+    name: 'Trending',
+    artKey: 'coord',
+    colors: '#f3d3b8,#d98b6b,#fff3e6',
+    imageUrl: '/src/assets/images/pk_girl_coords_1790618190382.jpg',
+  },
+  {
+    id: 'cat-sale',
+    name: 'Sale',
+    artKey: 'gown',
+    colors: '#b91c1c,#ef4444,#fee2e2',
+    imageUrl: '/src/assets/images/cat_readytowear_1790616255122.jpg',
   },
 ];
 
 const MEN_CATEGORIES: CategoryItem[] = [
+  {
+    id: 'men-cat-new',
+    name: 'New in',
+    artKey: 'coord',
+    colors: '#1e3a8a,#172554,#dbeafe',
+    imageUrl: '/src/assets/images/men_navy_kameez_shalwar_1790647675318.jpg',
+  },
   {
     id: 'men-cat-1',
     name: 'KAMEEZ SHALWAR',
@@ -84,7 +105,7 @@ const MEN_CATEGORIES: CategoryItem[] = [
   },
   {
     id: 'men-cat-4',
-    name: 'UNSTITCHED (BOSKI)',
+    name: 'UNSTITCHED',
     artKey: 'dupatta',
     colors: '#ca8a04,#854d0e,#fef9c3',
     imageUrl: '/src/assets/images/men_unstitched_boski_1790620213843.jpg',
@@ -94,7 +115,7 @@ const MEN_CATEGORIES: CategoryItem[] = [
     name: 'FORMAL KURTA',
     artKey: 'gown',
     colors: '#9a3412,#c2410c,#ffedd5',
-    imageUrl: '/src/assets/images/men_ceremonial_sherwani_1790621243663.jpg',
+    imageUrl: '/src/assets/images/men_formal_kurta_1790620174901.jpg',
   },
   {
     id: 'men-cat-6',
@@ -102,6 +123,13 @@ const MEN_CATEGORIES: CategoryItem[] = [
     artKey: 'bag',
     colors: '#78350f,#451a03,#fef3c7',
     imageUrl: '/src/assets/images/men_kaptaan_footwear_1790621961000.jpg',
+  },
+  {
+    id: 'men-cat-sale',
+    name: 'Sale',
+    artKey: 'kurta',
+    colors: '#b91c1c,#ef4444,#fee2e2',
+    imageUrl: '/src/assets/images/men_white_kameez_1790620262131.jpg',
   },
 ];
 
@@ -116,7 +144,11 @@ export const CategoryGrid: React.FC<CategoryGridProps> = ({ onSelectCategory, de
         </h2>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5">
+      <div className={`grid gap-3 sm:gap-4 md:gap-4 ${
+        categories.length === 8
+          ? 'grid-cols-2 sm:grid-cols-4 lg:grid-cols-8'
+          : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-6'
+      }`}>
         {categories.map((cat) => (
           <button
             key={cat.id}

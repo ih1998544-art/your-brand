@@ -211,16 +211,16 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
 
-        {/* Category Navigation Bar with Mega-menus (Desktop) */}
+        {/* Category Navigation Bar (Visible on all screens with horizontal scroll) */}
         {currentDepartment === 'Man' ? (
           <nav
             aria-label="Men's categories"
-            className="hidden md:flex justify-center items-center gap-7 lg:gap-9 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4"
+            className="flex justify-start md:justify-center items-center gap-5 sm:gap-7 lg:gap-9 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1"
           >
             <div className="py-2.5">
               <button
-                onClick={() => handleNavClick('New In')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                onClick={() => handleNavClick('New in')}
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 New in
               </button>
@@ -228,7 +228,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('KAMEEZ SHALWAR')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 Kameez Shalwar
               </button>
@@ -236,7 +236,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('KURTA TROUSER')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 Kurta Trouser
               </button>
@@ -244,7 +244,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('WAISTCOAT')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 Waistcoat
               </button>
@@ -252,15 +252,15 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('UNSTITCHED')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
-                Unstitched (Boski)
+                Unstitched
               </button>
             </div>
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('FORMAL KURTA')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 Formal Kurta
               </button>
@@ -268,7 +268,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('FOOTWEAR')}
-                className="hover:text-black text-neutral-700 transition-colors"
+                className="hover:text-black text-neutral-700 transition-colors cursor-pointer"
               >
                 Footwear
               </button>
@@ -276,7 +276,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div className="py-2.5">
               <button
                 onClick={() => handleNavClick('Sale')}
-                className="text-red-700 font-semibold hover:text-red-800 transition-colors"
+                className="text-red-700 font-semibold hover:text-red-800 transition-colors cursor-pointer"
               >
                 Sale
               </button>
@@ -285,7 +285,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         ) : (
           <nav
             aria-label="Women's categories"
-            className="hidden md:flex justify-center items-center gap-8 lg:gap-10 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4"
+            className="flex justify-start md:justify-center items-center gap-6 sm:gap-8 lg:gap-10 text-xs font-medium uppercase tracking-wider relative border-t border-neutral-100 px-4 overflow-x-auto scrollbar-none whitespace-nowrap py-1"
           >
             {/* New in */}
           <div

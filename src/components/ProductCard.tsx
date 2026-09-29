@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart } from 'lucide-react';
+import React, { useState } from 'react';
+import { Heart, ChevronLeft, ChevronRight, Layers } from 'lucide-react';
 import { Product, Currency } from '../types';
 import { VectorFashionArt } from './VectorFashionArt';
 
@@ -20,6 +20,27 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   onQuickAdd,
   onViewProduct,
 }) => {
+  const [activeImgIndex, setActiveImgIndex] = useState(0);
+
+  const images =
+    product.images && product.images.length > 0
+      ? product.images
+      : product.imageUrl
+      ? [product.imageUrl]
+      : [];
+
+  const displayedImage = images[activeImgIndex] || product.imageUrl;
+
+  const nextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImgIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveImgIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
   const formatPrice = (pkrAmount: number) => {
     const converted = pkrAmount * currency.rate;
     if (currency.code === 'PKR') {
@@ -48,6 +69,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
 
+        {/* Multi-Photo Indicator Badge */}
+        {images.length > 1 && (
+          <div className="absolute top-2.5 right-11 z-10 flex items-center gap-1 bg-black/55 backdrop-blur-xs px-2 py-0.5 rounded-full text-[9px] text-white opacity-0 group-hover:opacity-100 transition-opacity">
+            <Layers className="w-2.5 h-2.5 text-amber-300" />
+            <span>{activeImgIndex + 1}/{images.length}</span>
+          </div>
+        )}
+
         {/* Wishlist Heart Button */}
         <button
           onClick={(e) => {
@@ -68,6 +97,45 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           />
         </button>
 
+        {/* Photo Next / Prev Arrow Buttons on Card */}
+        {images.length > 1 && (
+          <>
+            <button
+              onClick={prevImage}
+              aria-label="Previous photo"
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronLeft className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={nextImage}
+              aria-label="Next photo"
+              className="absolute right-1.5 top-1/2 -translate-y-1/2 z-20 w-6 h-6 rounded-full bg-white/80 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+
+            {/* Bottom Photo indicator dots */}
+            <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 flex gap-1 items-center opacity-0 group-hover:opacity-100 transition-opacity pointer-events-auto">
+              {images.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveImgIndex(i);
+                  }}
+                  className={`h-1 rounded-full transition-all ${
+                    activeImgIndex === i
+                      ? 'w-3.5 bg-white shadow-xs'
+                      : 'w-1 bg-white/60 hover:bg-white'
+                  }`}
+                  aria-label={`View photo ${i + 1}`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+
         {/* Product Art (Clickable to view detail modal) */}
         <button
           onClick={() => onViewProduct(product)}
@@ -75,12 +143,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           aria-label={`View details of ${product.name}`}
         >
           <div className="w-full h-full transform transition-transform duration-500 ease-out group-hover:scale-103">
-            {product.imageUrl ? (
+            {displayedImage ? (
               <img
-                src={product.imageUrl}
+                src={displayedImage}
                 alt={product.name}
                 referrerPolicy="no-referrer"
-                className="w-full h-full object-cover object-center"
+                className="w-full h-full object-cover object-center transition-all duration-300"
               />
             ) : (
               <VectorFashionArt
