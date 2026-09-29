@@ -327,6 +327,67 @@ class AdminStoreService {
     return p.active;
   }
 
+  public duplicateProduct(id: string): Product | null {
+    const orig = this.products.find((p) => p.id === id);
+    if (!orig) return null;
+    const duplicated: Product = {
+      ...orig,
+      id: `prod-${Date.now()}`,
+      name: `${orig.name} (Copy)`,
+      sku: `${orig.sku}-CP`,
+      stock: orig.stock ?? 15,
+      isNew: true,
+    };
+    this.products.unshift(duplicated);
+    this.persistProducts();
+    return duplicated;
+  }
+
+  public bulkUpdatePrices(ids: string[], percentageDelta: number): void {
+    if (!ids || ids.length === 0) return;
+    const factor = 1 + percentageDelta / 100;
+    this.products = this.products.map((p) => {
+      if (ids.includes(p.id)) {
+        const newPrice = Math.max(100, Math.round((p.price * factor) / 10) * 10);
+        return {
+          ...p,
+          originalPrice: p.originalPrice ? Math.max(newPrice, Math.round((p.originalPrice * factor) / 10) * 10) : p.price,
+          price: newPrice,
+        };
+      }
+      return p;
+    });
+    this.persistProducts();
+  }
+
+  public bulkToggleActive(ids: string[], active: boolean): void {
+    if (!ids || ids.length === 0) return;
+    this.products = this.products.map((p) => {
+      if (ids.includes(p.id)) {
+        return { ...p, active };
+      }
+      return p;
+    });
+    this.persistProducts();
+  }
+
+  public bulkSetFeatured(ids: string[], featured: boolean): void {
+    if (!ids || ids.length === 0) return;
+    this.products = this.products.map((p) => {
+      if (ids.includes(p.id)) {
+        return { ...p, featured };
+      }
+      return p;
+    });
+    this.persistProducts();
+  }
+
+  public bulkDelete(ids: string[]): void {
+    if (!ids || ids.length === 0) return;
+    this.products = this.products.filter((p) => !ids.includes(p.id));
+    this.persistProducts();
+  }
+
   // ==========================================
   // 2. ORDERS MANAGEMENT
   // ==========================================

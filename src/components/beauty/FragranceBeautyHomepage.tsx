@@ -1,5 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Product, Currency } from '../../types';
+import { PRODUCTS } from '../../data/products';
 import { FRAGRANCE_BEAUTY_PRODUCTS } from '../../data/fragranceBeautyData';
 import { BeautyHeroSection } from './BeautyHeroSection';
 import { BeautyCategoryDiscovery } from './BeautyCategoryDiscovery';
@@ -31,6 +32,18 @@ export const FragranceBeautyHomepage: React.FC<FragranceBeautyHomepageProps> = (
   onNotify,
   onOpenCheckout,
 }) => {
+  const [storeTick, setStoreTick] = useState(0);
+  useEffect(() => {
+    const handleStoreChange = () => setStoreTick((tick) => tick + 1);
+    window.addEventListener('store_updated', handleStoreChange);
+    return () => window.removeEventListener('store_updated', handleStoreChange);
+  }, []);
+
+  const beautyProducts = useMemo(() => {
+    const fromGlobal = PRODUCTS.filter((p) => p.department === 'Fragrance & Beauty');
+    return fromGlobal.length > 0 ? fromGlobal : FRAGRANCE_BEAUTY_PRODUCTS;
+  }, [storeTick]);
+
   const [activeCategory, setActiveCategory] = useState<string>(
     activeCategoryFilter || 'All'
   );
@@ -61,25 +74,25 @@ export const FragranceBeautyHomepage: React.FC<FragranceBeautyHomepageProps> = (
   const availableSubcategories = useMemo(() => {
     if (activeCategory.toLowerCase() === 'all') {
       const allSubs = new Set<string>();
-      FRAGRANCE_BEAUTY_PRODUCTS.forEach((p) => {
+      beautyProducts.forEach((p) => {
         if (p.subCategory) allSubs.add(p.subCategory);
       });
       return ['All', ...Array.from(allSubs)];
     }
 
     const filteredSubs = new Set<string>();
-    FRAGRANCE_BEAUTY_PRODUCTS.filter(
+    beautyProducts.filter(
       (p) => p.beautyCategory?.toLowerCase() === activeCategory.toLowerCase()
     ).forEach((p) => {
       if (p.subCategory) filteredSubs.add(p.subCategory);
     });
 
     return ['All', ...Array.from(filteredSubs)];
-  }, [activeCategory]);
+  }, [activeCategory, beautyProducts]);
 
   // Filtered & Sorted products list
   const filteredProducts = useMemo(() => {
-    let prods = [...FRAGRANCE_BEAUTY_PRODUCTS];
+    let prods = [...beautyProducts];
 
     // Filter by major category
     if (activeCategory.toLowerCase() !== 'all') {

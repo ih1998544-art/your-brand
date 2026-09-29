@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, MapPin, Shield, Sparkles } from 'lucide-react';
-import { Currency, Department } from '../types';
+import { Search, ShoppingBag, Heart, Menu, X, ChevronDown, MapPin, Shield, Sparkles, User, LogOut } from 'lucide-react';
+import { Currency, Department, UserProfile } from '../types';
 import { FragranceMegaMenu } from './beauty/FragranceMegaMenu';
 import { AdminPanelModal } from './AdminPanelModal';
 
@@ -12,10 +12,14 @@ interface NavbarProps {
   currencies: Currency[];
   wishlistCount: number;
   cartCount: number;
+  currentUser?: UserProfile | null;
   onOpenWishlist: () => void;
   onOpenCart: () => void;
   onOpenSearch: () => void;
   onOpenSignIn: () => void;
+  onOpenAccount?: () => void;
+  onOpenServerTest?: () => void;
+  onSignOut?: () => void;
   onOpenTracking: () => void;
   onOpenStoreLocator: () => void;
   onFilterCategory?: (category: string) => void;
@@ -30,10 +34,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   currencies,
   wishlistCount,
   cartCount,
+  currentUser,
   onOpenWishlist,
   onOpenCart,
   onOpenSearch,
   onOpenSignIn,
+  onOpenAccount,
+  onOpenServerTest,
+  onSignOut,
   onOpenTracking,
   onOpenStoreLocator,
   onFilterCategory,
@@ -68,12 +76,49 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* ======================================================== */}
       <div className="bg-neutral-950 text-neutral-300 text-[10px] sm:text-[11px] tracking-wider uppercase py-2 px-4 border-b border-neutral-800">
         <div className="max-w-7xl mx-auto flex items-center justify-between sm:justify-center gap-4 sm:gap-8 overflow-x-auto scrollbar-none whitespace-nowrap">
-          <button
-            onClick={onOpenSignIn}
-            className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium"
-          >
-            Sign in
-          </button>
+          {currentUser?.isLoggedIn ? (
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={onOpenAccount}
+                className="hover:text-white transition-colors cursor-pointer font-semibold flex items-center gap-1 text-amber-300"
+                title="View VIP Client Profile & Orders"
+              >
+                <User className="w-3 h-3 text-amber-400" />
+                <span>Hi, {currentUser.name.split(' ')[0]}</span>
+                <span className="text-[9px] bg-amber-400/20 text-amber-300 px-1 py-0.5 rounded-xs border border-amber-400/30">VIP</span>
+              </button>
+              {onSignOut && (
+                <button
+                  onClick={onSignOut}
+                  className="text-neutral-500 hover:text-white text-[10px] ml-1 transition-colors cursor-pointer"
+                  title="Sign out"
+                >
+                  (Sign Out)
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={onOpenSignIn}
+              className="hover:text-white transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1"
+            >
+              <User className="w-3 h-3 text-neutral-400" />
+              <span>Sign in</span>
+            </button>
+          )}
+          {onOpenServerTest && (
+            <>
+              <span className="text-neutral-700 hidden sm:inline">•</span>
+              <button
+                onClick={onOpenServerTest}
+                className="hover:text-emerald-400 text-neutral-300 transition-colors cursor-pointer shrink-0 font-medium flex items-center gap-1.5"
+                title="Run Live Server-Side Auth Diagnostics & Tests"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>Auth API Test</span>
+              </button>
+            </>
+          )}
           <span className="text-neutral-700 hidden sm:inline">•</span>
           <button
             onClick={onOpenTracking}
@@ -246,6 +291,16 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span>SEARCH</span>
             </button>
 
+            {/* ACCOUNT / SIGN IN */}
+            <button
+              onClick={currentUser?.isLoggedIn ? onOpenAccount : onOpenSignIn}
+              className="flex items-center gap-1.5 text-neutral-800 hover:text-black transition-colors cursor-pointer shrink-0 group"
+              title={currentUser?.isLoggedIn ? `VIP Account: ${currentUser.name}` : 'Sign In / Register'}
+            >
+              <User className={`w-3.5 h-3.5 ${currentUser?.isLoggedIn ? 'text-amber-600' : 'text-neutral-600 group-hover:text-black'} transition-colors`} />
+              <span>{currentUser?.isLoggedIn ? currentUser.name.split(' ')[0] : 'SIGN IN'}</span>
+            </button>
+
             {/* WISHLIST with small circular item-count badge */}
             <button
               onClick={onOpenWishlist}
@@ -308,8 +363,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             </a>
           </div>
 
-          {/* Right: Admin icon, Wishlist, Bag with badges */}
+          {/* Right: User account, Admin icon, Wishlist, Bag with badges */}
           <div className="flex items-center gap-1.5 sm:gap-2 z-10">
+            <button
+              onClick={currentUser?.isLoggedIn ? onOpenAccount : onOpenSignIn}
+              className="p-1.5 text-neutral-800 hover:text-black cursor-pointer"
+              title={currentUser?.isLoggedIn ? `Account (${currentUser.name})` : "Sign In"}
+              aria-label="Account"
+            >
+              <User className={`w-4 h-4 ${currentUser?.isLoggedIn ? 'text-amber-600' : 'text-neutral-800'}`} />
+            </button>
+
             <button
               onClick={() => setAdminModalOpen(true)}
               className="p-1.5 text-neutral-700 hover:text-black cursor-pointer"
@@ -1146,15 +1210,28 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2 pt-1">
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    onOpenSignIn();
-                  }}
-                  className="w-full py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider font-medium text-center cursor-pointer hover:bg-black transition-colors"
-                >
-                  Sign in
-                </button>
+                {currentUser?.isLoggedIn ? (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenAccount?.();
+                    }}
+                    className="w-full py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider font-semibold text-center cursor-pointer hover:bg-black transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    <User className="w-3.5 h-3.5 text-amber-400" />
+                    <span>My Account</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      onOpenSignIn();
+                    }}
+                    className="w-full py-2 bg-neutral-900 text-white text-xs uppercase tracking-wider font-medium text-center cursor-pointer hover:bg-black transition-colors"
+                  >
+                    Sign in
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);

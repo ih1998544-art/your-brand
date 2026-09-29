@@ -5,6 +5,8 @@ import {
   CategoryCard,
   PromoBanner,
   TeenProduct,
+  ALL_TEEN_PRODUCTS,
+  getProductsForCategory,
 } from '../../data/teensData';
 import { Currency, Product } from '../../types';
 import { TeensHeroSection } from './TeensHeroSection';
@@ -87,11 +89,28 @@ export const TeensHomepage: React.FC<TeensHomepageProps> = ({
   const handleTeenToggleWishlist = (productId: string, productName: string) => {
     const product =
       teensCms.getTrendingProducts().find((p) => p.id === productId) ||
-      trendingFits.find((p) => p.id === productId);
+      trendingFits.find((p) => p.id === productId) ||
+      ALL_TEEN_PRODUCTS.find((p) => p.id === productId) ||
+      getProductsForCategory(selectedCategory).find((p) => p.id === productId);
     if (product) {
       onToggleWishlist(adaptToProduct(product));
     } else {
-      onNotify(`Wishlist updated for ${productName}`);
+      onToggleWishlist({
+        id: productId,
+        name: productName,
+        price: 2990,
+        originalPrice: 3990,
+        categoryKey: 'coord',
+        colorPalette: '#222222,#ffffff',
+        tab: 'new',
+        categorySlug: 'new',
+        department: 'Teens',
+        isNew: true,
+        fabric: 'Pure Cotton',
+        details: '',
+        sizes: ['XS', 'S', 'M', 'L'],
+        sku: `TN-${productId}`,
+      });
     }
   };
 

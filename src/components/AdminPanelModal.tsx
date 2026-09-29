@@ -20,6 +20,8 @@ import {
   Search,
   Plus,
   Edit2,
+  Edit3,
+  Sliders,
   Trash2,
   Eye,
   Check,
@@ -41,8 +43,13 @@ import {
   Mail,
   MapPin,
   Lock,
+  Percent,
+  CheckSquare,
+  Square,
+  ArrowUpDown,
 } from 'lucide-react';
 import { Department, Currency, Product, CategoryKey, ProductTab } from '../types';
+import { ProductCustomizerModal } from './admin/ProductCustomizerModal';
 import {
   adminStore,
   AdminOrder,
@@ -105,7 +112,20 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   // Modals & form dialog states
   const [productModalOpen, setProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [productForm, setProductForm] = useState<Partial<Product>>({});
+
+  // In-line Quick Edit State
+  const [inlineEditingId, setInlineEditingId] = useState<string | null>(null);
+  const [inlineForm, setInlineForm] = useState<{
+    name: string;
+    price: number;
+    originalPrice?: number;
+    stock: number;
+  }>({ name: '', price: 0, stock: 10 });
+
+  // Bulk Product Actions State
+  const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set());
+  const [bulkPriceModalOpen, setBulkPriceModalOpen] = useState(false);
+  const [bulkPricePct, setBulkPricePct] = useState<number>(10);
 
   const [orderDetailModal, setOrderDetailModal] = useState<AdminOrder | null>(null);
   const [customerDetailModal, setCustomerDetailModal] = useState<AdminCustomer | null>(null);
@@ -129,6 +149,9 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   const [productSearch, setProductSearch] = useState('');
   const [productDeptFilter, setProductDeptFilter] = useState<string>('All');
   const [productStockFilter, setProductStockFilter] = useState<'All' | 'Low' | 'Out'>('All');
+  const [productSortBy, setProductSortBy] = useState<
+    'default' | 'price-asc' | 'price-desc' | 'name-asc' | 'stock-asc'
+  >('default');
 
   const [orderSearch, setOrderSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('All');
@@ -177,52 +200,124 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
   }, [products]);
 
   // ==========================================
-  // HANDLERS FOR PRODUCTS
+  // HANDLERS FOR PRODUCTS & CUSTOMIZATION
   // ==========================================
   const handleOpenAddProduct = () => {
     setEditingProduct(null);
-    setProductForm({
-      name: '',
-      price: 5990,
-      originalPrice: 7990,
-      department: currentDepartment === 'Anniversary B1G1' ? 'Woman' : currentDepartment,
-      categoryKey: 'coord',
-      tab: 'rtw',
-      fabric: 'Fine Cotton / Lawn',
-      details: 'Contemporary tailored cut with artisanal finishing.',
-      sizes: ['S', 'M', 'L', 'XL'],
-      sku: `YB-${Math.floor(1000 + Math.random() * 9000)}`,
-      stock: 25,
-      active: true,
-      featured: false,
-      isNew: true,
-      imageUrl: '/src/assets/images/mannequin_plum_embroidered_1790645171231.jpg',
-    });
     setProductModalOpen(true);
   };
 
   const handleOpenEditProduct = (p: Product) => {
     setEditingProduct(p);
-    setProductForm({ ...p });
     setProductModalOpen(true);
   };
 
-  const handleSaveProduct = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!productForm.name || !productForm.price) {
-      triggerToast('Please provide a product title and price');
-      return;
-    }
-
+  const handleSaveProductCustomizer = (productData: Partial<Product>) => {
     if (editingProduct) {
-      adminStore.updateProduct(editingProduct.id, productForm);
-      triggerToast(`Updated product: ${productForm.name}`);
+      adminStore.updateProduct(editingProduct.id, productData);
+      triggerToast(`Customized article: ${productData.name || editingProduct.name}`);
     } else {
-      adminStore.addProduct(productForm);
-      triggerToast(`Created new product: ${productForm.name}`);
+      const created = adminStore.addProduct(productData);
+      triggerToast(`Created new article: ${created.name}`);
     }
     setProductModalOpen(false);
     refreshAll();
+  };
+
+  const handleDuplicateProduct = (id: string) => {
+    const duplicated = adminStore.duplicateProduct(id);
+    if (duplicated) {
+      refreshAll();
+      triggerToast(`Duplicated: ${duplicated.name}`);
+    }
+  };
+
+  // In-line Quick Edit Handlers
+  const handleStartInlineEdit = (p: Product) => {
+    setInlineEditingId(p.id);
+    setInlineForm({
+      name: p.name,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      stock: p.stock ?? 10,
+    });
+  };
+
+  const handleSaveInlineEdit = (id: string) => {
+    if (!inlineForm.name?.trim()) {
+      triggerToast('Article title cannot be empty');
+      return;
+    }
+    adminStore.updateProduct(id, {
+      name: inlineForm.name.trim(),
+      price: Number(inlineForm.price),
+      originalPrice: inlineForm.originalPrice ? Number(inlineForm.originalPrice) : undefined,
+      stock: Number(inlineForm.stock),
+    });
+    setInlineEditingId(null);
+    refreshAll();
+    triggerToast(`Quick saved: ${inlineForm.name} (₨ ${inlineForm.price.toLocaleString()})`);
+  };
+
+  const handleCancelInlineEdit = () => {
+    setInlineEditingId(null);
+  };
+
+  // Bulk Product Handlers
+  const handleToggleSelectProduct = (id: string) => {
+    setSelectedProductIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const handleSelectAllProducts = (filteredIds: string[]) => {
+    if (selectedProductIds.size === filteredIds.length) {
+      setSelectedProductIds(new Set());
+    } else {
+      setSelectedProductIds(new Set(filteredIds));
+    }
+  };
+
+  const handleApplyBulkPrices = (percentageDelta: number) => {
+    const ids = Array.from(selectedProductIds);
+    if (ids.length === 0) return;
+    adminStore.bulkUpdatePrices(ids, percentageDelta);
+    setSelectedProductIds(new Set());
+    setBulkPriceModalOpen(false);
+    refreshAll();
+    triggerToast(
+      `Adjusted prices by ${percentageDelta > 0 ? `+${percentageDelta}` : percentageDelta}% for ${ids.length} articles`
+    );
+  };
+
+  const handleBulkToggleActive = (active: boolean) => {
+    const ids = Array.from(selectedProductIds);
+    if (ids.length === 0) return;
+    adminStore.bulkToggleActive(ids, active);
+    setSelectedProductIds(new Set());
+    refreshAll();
+    triggerToast(`Updated storefront visibility for ${ids.length} articles`);
+  };
+
+  const handleBulkSetFeatured = (featured: boolean) => {
+    const ids = Array.from(selectedProductIds);
+    if (ids.length === 0) return;
+    adminStore.bulkSetFeatured(ids, featured);
+    setSelectedProductIds(new Set());
+    refreshAll();
+    triggerToast(`Marked ${ids.length} articles as ${featured ? 'Featured' : 'Standard'}`);
+  };
+
+  const handleBulkDelete = () => {
+    const ids = Array.from(selectedProductIds);
+    if (ids.length === 0) return;
+    adminStore.bulkDelete(ids);
+    setSelectedProductIds(new Set());
+    refreshAll();
+    triggerToast(`Deleted ${ids.length} articles`);
   };
 
   const handleDeleteConfirmed = () => {
@@ -323,7 +418,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
 
   // Filtered product list
   const filteredProducts = useMemo(() => {
-    return products.filter((p) => {
+    const list = products.filter((p) => {
       const matchSearch =
         p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
         p.sku.toLowerCase().includes(productSearch.toLowerCase());
@@ -337,7 +432,14 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       }
       return matchSearch && matchDept && matchStock;
     });
-  }, [products, productSearch, productDeptFilter, productStockFilter]);
+
+    if (productSortBy === 'price-asc') list.sort((a, b) => a.price - b.price);
+    else if (productSortBy === 'price-desc') list.sort((a, b) => b.price - a.price);
+    else if (productSortBy === 'name-asc') list.sort((a, b) => a.name.localeCompare(b.name));
+    else if (productSortBy === 'stock-asc') list.sort((a, b) => (a.stock ?? 10) - (b.stock ?? 10));
+
+    return list;
+  }, [products, productSearch, productDeptFilter, productStockFilter, productSortBy]);
 
   // Filtered orders list
   const filteredOrders = useMemo(() => {
@@ -693,39 +795,102 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
               <div className="space-y-6">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h1 className="font-serif text-2xl font-bold tracking-tight text-white">Products Management</h1>
+                    <h1 className="font-serif text-2xl font-bold tracking-tight text-white">Products Management & Customizer</h1>
                     <p className="text-xs text-neutral-400">
-                      Add, edit, delete articles, set prices, discounts, tags and stock. Updates appear instantly on the live website.
+                      Customize titles, regular & promotional prices, inventory, size allocations and photoshoot media. Updates apply instantly across the storefront.
                     </p>
                   </div>
-                  <button
-                    onClick={handleOpenAddProduct}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-amber-500/20 cursor-pointer transition-colors"
-                  >
-                    <Plus className="w-4 h-4" />
-                    <span>Add New Product</span>
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handleOpenAddProduct}
+                      className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs uppercase tracking-wider rounded-lg shadow-lg shadow-amber-500/20 cursor-pointer transition-colors"
+                    >
+                      <Plus className="w-4 h-4 stroke-[3]" />
+                      <span>Add New Product</span>
+                    </button>
+                  </div>
                 </div>
 
-                {/* Search & Filter Toolbar */}
+                {/* Bulk Actions Floating / Top Bar (appears when items are selected) */}
+                {selectedProductIds.size > 0 && (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs animate-slideDown">
+                    <div className="flex items-center gap-2 text-amber-300 font-bold">
+                      <CheckSquare className="w-4 h-4" />
+                      <span>{selectedProductIds.size} article(s) selected</span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setBulkPriceModalOpen(true)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-[11px] uppercase tracking-wider cursor-pointer"
+                      >
+                        <Percent className="w-3.5 h-3.5" />
+                        <span>Adjust Prices %</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleBulkToggleActive(true)}
+                        className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-emerald-400 font-semibold text-[11px] cursor-pointer"
+                      >
+                        Activate All
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleBulkToggleActive(false)}
+                        className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-semibold text-[11px] cursor-pointer"
+                      >
+                        Deactivate All
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleBulkSetFeatured(true)}
+                        className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-amber-300 font-semibold text-[11px] cursor-pointer"
+                      >
+                        Mark Featured
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleBulkDelete}
+                        className="px-2.5 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 text-red-300 font-semibold text-[11px] cursor-pointer"
+                      >
+                        Delete Selected
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setSelectedProductIds(new Set())}
+                        className="px-2.5 py-1.5 text-neutral-400 hover:text-white text-[11px] underline cursor-pointer"
+                      >
+                        Deselect
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Search, Filter & Sort Toolbar */}
                 <div className="p-4 bg-neutral-950 border border-neutral-800 rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
-                  <div className="flex items-center gap-2 flex-1 min-w-[240px]">
+                  <div className="flex items-center gap-2 flex-1 min-w-[220px]">
                     <Search className="w-4 h-4 text-neutral-500" />
                     <input
                       type="text"
-                      placeholder="Search by article name or SKU..."
+                      placeholder="Search article name, SKU or fabric..."
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                       className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-white placeholder-neutral-500 focus:outline-none focus:border-amber-400"
                     />
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="text-neutral-400">Department:</span>
                     <select
                       value={productDeptFilter}
                       onChange={(e) => setProductDeptFilter(e.target.value)}
-                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none cursor-pointer"
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-2 text-white focus:outline-none cursor-pointer"
                     >
                       <option value="All">All Departments</option>
                       <option value="Woman">Woman</option>
@@ -734,15 +899,28 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <option value="Fragrance & Beauty">Fragrance & Beauty</option>
                     </select>
 
-                    <span className="text-neutral-400 ml-2">Stock:</span>
+                    <span className="text-neutral-400 ml-1">Stock:</span>
                     <select
                       value={productStockFilter}
                       onChange={(e) => setProductStockFilter(e.target.value as any)}
-                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-2 text-white focus:outline-none cursor-pointer"
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-2 text-white focus:outline-none cursor-pointer"
                     >
                       <option value="All">All Levels</option>
                       <option value="Low">Low Stock (&le;5)</option>
                       <option value="Out">Out of Stock (0)</option>
+                    </select>
+
+                    <span className="text-neutral-400 ml-1">Sort:</span>
+                    <select
+                      value={productSortBy}
+                      onChange={(e) => setProductSortBy(e.target.value as any)}
+                      className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-2 text-white focus:outline-none cursor-pointer"
+                    >
+                      <option value="default">Default Curated</option>
+                      <option value="price-asc">Price: Low to High</option>
+                      <option value="price-desc">Price: High to Low</option>
+                      <option value="name-asc">Name: A to Z</option>
+                      <option value="stock-asc">Stock: Low to High</option>
                     </select>
                   </div>
                 </div>
@@ -753,14 +931,28 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                     <table className="w-full text-left text-xs text-neutral-300">
                       <thead className="bg-neutral-900 text-neutral-400 font-semibold uppercase tracking-wider">
                         <tr>
-                          <th className="py-3 px-3">Item</th>
+                          <th className="py-3 px-3 w-8">
+                            <input
+                              type="checkbox"
+                              checked={
+                                filteredProducts.length > 0 &&
+                                selectedProductIds.size === filteredProducts.length
+                              }
+                              onChange={() =>
+                                handleSelectAllProducts(filteredProducts.map((p) => p.id))
+                              }
+                              className="rounded text-amber-500 focus:ring-0 cursor-pointer"
+                              title="Select all filtered articles"
+                            />
+                          </th>
+                          <th className="py-3 px-3">Item / Name</th>
                           <th className="py-3 px-3">SKU</th>
                           <th className="py-3 px-3">Dept</th>
-                          <th className="py-3 px-3">Price</th>
+                          <th className="py-3 px-3">Price (PKR)</th>
                           <th className="py-3 px-3">Stock</th>
                           <th className="py-3 px-3">Badges</th>
                           <th className="py-3 px-3">Active</th>
-                          <th className="py-3 px-3 text-right">Actions</th>
+                          <th className="py-3 px-3 text-right">Customize & Actions</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-neutral-800">
@@ -770,9 +962,31 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                             p.originalPrice && p.originalPrice > p.price
                               ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
                               : 0;
+                          const isSelected = selectedProductIds.has(p.id);
+                          const isInlineEditing = inlineEditingId === p.id;
 
                           return (
-                            <tr key={p.id} className="hover:bg-neutral-900/60 transition-colors">
+                            <tr
+                              key={p.id}
+                              className={`transition-colors ${
+                                isSelected
+                                  ? 'bg-amber-500/5'
+                                  : isInlineEditing
+                                  ? 'bg-neutral-900'
+                                  : 'hover:bg-neutral-900/60'
+                              }`}
+                            >
+                              {/* Checkbox */}
+                              <td className="py-3 px-3">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleToggleSelectProduct(p.id)}
+                                  className="rounded text-amber-500 focus:ring-0 cursor-pointer"
+                                />
+                              </td>
+
+                              {/* Item & Name */}
                               <td className="py-3 px-3">
                                 <div className="flex items-center gap-3">
                                   <img
@@ -780,39 +994,130 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                     alt={p.name}
                                     className="w-10 h-12 object-cover rounded bg-neutral-800 border border-neutral-700 shrink-0"
                                   />
-                                  <div className="min-w-0">
-                                    <div className="font-semibold text-white truncate max-w-[220px]">{p.name}</div>
-                                    <div className="text-[11px] text-neutral-500">{p.fabric}</div>
+                                  <div className="min-w-0 flex-1">
+                                    {isInlineEditing ? (
+                                      <input
+                                        type="text"
+                                        value={inlineForm.name}
+                                        onChange={(e) =>
+                                          setInlineForm({ ...inlineForm, name: e.target.value })
+                                        }
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') handleSaveInlineEdit(p.id);
+                                          if (e.key === 'Escape') handleCancelInlineEdit();
+                                        }}
+                                        className="w-full bg-neutral-950 border border-amber-400 rounded px-2 py-1 text-white text-xs font-semibold focus:outline-none"
+                                        autoFocus
+                                      />
+                                    ) : (
+                                      <div
+                                        onClick={() => handleStartInlineEdit(p)}
+                                        className="font-semibold text-white truncate max-w-[200px] sm:max-w-[240px] hover:text-amber-300 cursor-pointer"
+                                        title="Click to quick-edit name"
+                                      >
+                                        {p.name}
+                                      </div>
+                                    )}
+                                    <div className="text-[11px] text-neutral-500 truncate max-w-[200px]">
+                                      {p.fabric || 'Luxury Pret'}
+                                    </div>
                                   </div>
                                 </div>
                               </td>
+
+                              {/* SKU */}
                               <td className="py-3 px-3 font-mono text-[11px] text-neutral-400">{p.sku}</td>
+
+                              {/* Department */}
                               <td className="py-3 px-3">
-                                <span className="px-2 py-0.5 bg-neutral-800 rounded text-[11px] text-neutral-300 font-medium">
+                                <span className="px-2 py-0.5 bg-neutral-800 rounded text-[11px] text-neutral-300 font-medium whitespace-nowrap">
                                   {p.department}
                                 </span>
                               </td>
+
+                              {/* Price */}
                               <td className="py-3 px-3">
-                                <div className="font-semibold text-white">₨ {p.price.toLocaleString()}</div>
-                                {p.originalPrice && (
-                                  <div className="text-[10px] text-neutral-500 line-through">
-                                    ₨ {p.originalPrice.toLocaleString()} (-{discountPercent}%)
+                                {isInlineEditing ? (
+                                  <div className="space-y-1">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[10px] text-neutral-500 font-mono">₨</span>
+                                      <input
+                                        type="number"
+                                        value={inlineForm.price}
+                                        onChange={(e) =>
+                                          setInlineForm({
+                                            ...inlineForm,
+                                            price: Number(e.target.value),
+                                          })
+                                        }
+                                        className="w-24 bg-neutral-950 border border-amber-400 rounded px-1.5 py-0.5 text-white font-mono text-xs font-bold focus:outline-none"
+                                      />
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-[9px] text-neutral-500">Was:</span>
+                                      <input
+                                        type="number"
+                                        value={inlineForm.originalPrice || ''}
+                                        onChange={(e) =>
+                                          setInlineForm({
+                                            ...inlineForm,
+                                            originalPrice: e.target.value
+                                              ? Number(e.target.value)
+                                              : undefined,
+                                          })
+                                        }
+                                        placeholder="Original"
+                                        className="w-20 bg-neutral-950 border border-neutral-700 rounded px-1.5 py-0.5 text-neutral-300 font-mono text-[10px] focus:outline-none"
+                                      />
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <div
+                                    onClick={() => handleStartInlineEdit(p)}
+                                    className="cursor-pointer group"
+                                    title="Click to quick-edit price"
+                                  >
+                                    <div className="font-semibold text-white group-hover:text-amber-300 flex items-center gap-1">
+                                      <span>₨ {p.price.toLocaleString()}</span>
+                                      <Edit3 className="w-3 h-3 opacity-0 group-hover:opacity-100 text-amber-400 transition-opacity" />
+                                    </div>
+                                    {p.originalPrice && p.originalPrice > p.price && (
+                                      <div className="text-[10px] text-neutral-500 line-through">
+                                        ₨ {p.originalPrice.toLocaleString()} (-{discountPercent}%)
+                                      </div>
+                                    )}
                                   </div>
                                 )}
                               </td>
+
+                              {/* Stock */}
                               <td className="py-3 px-3">
-                                <span
-                                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold text-[11px] ${
-                                    stock === 0
-                                      ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                                      : stock <= 5
-                                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
-                                      : 'bg-emerald-500/10 text-emerald-400'
-                                  }`}
-                                >
-                                  {stock} in stock
-                                </span>
+                                {isInlineEditing ? (
+                                  <input
+                                    type="number"
+                                    min={0}
+                                    value={inlineForm.stock}
+                                    onChange={(e) =>
+                                      setInlineForm({ ...inlineForm, stock: Number(e.target.value) })
+                                    }
+                                    className="w-16 bg-neutral-950 border border-neutral-700 rounded px-1.5 py-1 text-white font-mono text-xs focus:outline-none"
+                                  />
+                                ) : (
+                                  <span
+                                    className={`inline-flex items-center gap-1 px-2 py-0.5 rounded font-mono font-bold text-[11px] ${
+                                      stock === 0
+                                        ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                                        : stock <= 5
+                                        ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                                        : 'bg-emerald-500/10 text-emerald-400'
+                                    }`}
+                                  >
+                                    {stock} in stock
+                                  </span>
+                                )}
                               </td>
+
+                              {/* Badges */}
                               <td className="py-3 px-3">
                                 <div className="flex flex-wrap gap-1">
                                   {p.featured && (
@@ -832,40 +1137,79 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                                   )}
                                 </div>
                               </td>
+
+                              {/* Active Toggle */}
                               <td className="py-3 px-3">
                                 <button
                                   onClick={() => handleToggleProductStatus(p.id)}
                                   className={`w-9 h-5 rounded-full p-0.5 transition-colors cursor-pointer flex items-center ${
-                                    p.active !== false ? 'bg-emerald-500 justify-end' : 'bg-neutral-700 justify-start'
+                                    p.active !== false
+                                      ? 'bg-emerald-500 justify-end'
+                                      : 'bg-neutral-700 justify-start'
                                   }`}
-                                  title="Toggle Active/Inactive"
+                                  title="Toggle Storefront Visibility"
                                 >
                                   <div className="w-4 h-4 rounded-full bg-white shadow-xs"></div>
                                 </button>
                               </td>
+
+                              {/* Action Buttons */}
                               <td className="py-3 px-3 text-right">
-                                <div className="flex items-center justify-end gap-1.5">
-                                  <button
-                                    onClick={() => handleOpenEditProduct(p)}
-                                    className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded cursor-pointer transition-colors"
-                                    title="Edit Product"
-                                  >
-                                    <Edit2 className="w-3.5 h-3.5" />
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      setDeleteConfirm({
-                                        type: 'product',
-                                        id: p.id,
-                                        title: p.name,
-                                      })
-                                    }
-                                    className="p-1.5 bg-neutral-800 hover:bg-red-950 text-neutral-400 hover:text-red-400 rounded cursor-pointer transition-colors"
-                                    title="Delete Product"
-                                  >
-                                    <Trash2 className="w-3.5 h-3.5" />
-                                  </button>
-                                </div>
+                                {isInlineEditing ? (
+                                  <div className="flex items-center justify-end gap-1.5">
+                                    <button
+                                      onClick={() => handleSaveInlineEdit(p.id)}
+                                      className="p-1.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-bold rounded cursor-pointer transition-colors shadow-xs"
+                                      title="Save Quick Edit"
+                                    >
+                                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                                    </button>
+                                    <button
+                                      onClick={handleCancelInlineEdit}
+                                      className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded cursor-pointer transition-colors"
+                                      title="Cancel"
+                                    >
+                                      <X className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center justify-end gap-1">
+                                    <button
+                                      onClick={() => handleStartInlineEdit(p)}
+                                      className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-amber-400 hover:text-amber-300 rounded cursor-pointer transition-colors"
+                                      title="Quick In-line Edit Price & Name"
+                                    >
+                                      <Edit3 className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleOpenEditProduct(p)}
+                                      className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 hover:text-white rounded cursor-pointer transition-colors"
+                                      title="Full Product Customizer (Media, Sizes, Details)"
+                                    >
+                                      <Sliders className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDuplicateProduct(p.id)}
+                                      className="p-1.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 hover:text-neutral-200 rounded cursor-pointer transition-colors"
+                                      title="Duplicate Article"
+                                    >
+                                      <Copy className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        setDeleteConfirm({
+                                          type: 'product',
+                                          id: p.id,
+                                          title: p.name,
+                                        })
+                                      }
+                                      className="p-1.5 bg-neutral-800 hover:bg-red-950 text-neutral-400 hover:text-red-400 rounded cursor-pointer transition-colors"
+                                      title="Delete Product"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           );
@@ -1939,196 +2283,103 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
       </div>
 
       {/* ======================================================== */}
-      {/* MODAL: ADD / EDIT PRODUCT                                */}
+      {/* MODAL: ADVANCED PRODUCT CUSTOMIZER STUDIO                */}
       {/* ======================================================== */}
-      {productModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/70 backdrop-blur-xs">
+      <ProductCustomizerModal
+        isOpen={productModalOpen}
+        onClose={() => setProductModalOpen(false)}
+        product={editingProduct}
+        defaultDepartment={currentDepartment === 'Anniversary B1G1' ? 'Woman' : currentDepartment}
+        onSave={handleSaveProductCustomizer}
+        onDuplicate={handleDuplicateProduct}
+        onNotify={triggerToast}
+      />
+
+      {/* ======================================================== */}
+      {/* MODAL: BULK PRICE ADJUSTMENT                             */}
+      {/* ======================================================== */}
+      {bulkPriceModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-xs font-sans text-xs">
           <div
-            className="w-full max-w-2xl bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] text-xs"
+            className="w-full max-w-md bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl p-5 space-y-4 text-white"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-4 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-                {editingProduct ? 'Edit Product' : 'Add New Product'}
-              </h3>
-              <button onClick={() => setProductModalOpen(false)} className="text-neutral-400 hover:text-white">
+            <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
+              <div className="flex items-center gap-2">
+                <Percent className="w-4 h-4 text-amber-400" />
+                <h3 className="font-bold text-sm uppercase tracking-wider">
+                  Bulk Price Adjustment ({selectedProductIds.size} articles)
+                </h3>
+              </div>
+              <button
+                onClick={() => setBulkPriceModalOpen(false)}
+                className="text-neutral-400 hover:text-white"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="p-5 overflow-y-auto space-y-4">
+            <p className="text-neutral-400">
+              Apply a percentage promotional discount or cost markup across all {selectedProductIds.size} selected articles.
+            </p>
+
+            <div className="space-y-3">
               <div>
-                <label className="block text-neutral-400 mb-1 font-semibold">Article Title / Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={productForm.name || ''}
-                  onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
-                  placeholder="e.g. Royal Emerald Embroidered Kurta Set"
-                  className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-400"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">Department *</label>
-                  <select
-                    value={productForm.department || 'Woman'}
-                    onChange={(e) => setProductForm({ ...productForm, department: e.target.value as any })}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none"
-                  >
-                    <option value="Woman">Woman</option>
-                    <option value="Man">Man</option>
-                    <option value="Teens">Teens</option>
-                    <option value="Fragrance & Beauty">Fragrance & Beauty</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">SKU *</label>
-                  <input
-                    type="text"
-                    required
-                    value={productForm.sku || ''}
-                    onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">Fabric</label>
-                  <input
-                    type="text"
-                    value={productForm.fabric || ''}
-                    onChange={(e) => setProductForm({ ...productForm, fabric: e.target.value })}
-                    placeholder="e.g. Pure Cotton Lawn"
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">Sale Price (PKR) *</label>
+                <label className="block text-neutral-300 font-semibold mb-1">
+                  Adjustment Percentage (%)
+                </label>
+                <div className="flex items-center gap-2">
                   <input
                     type="number"
-                    required
-                    min={0}
-                    value={productForm.price || ''}
-                    onChange={(e) => setProductForm({ ...productForm, price: Number(e.target.value) })}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none"
+                    value={bulkPricePct}
+                    onChange={(e) => setBulkPricePct(Number(e.target.value))}
+                    className="w-32 bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white font-mono text-sm font-bold focus:outline-none focus:border-amber-400"
                   />
-                </div>
-
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">Original Price (PKR)</label>
-                  <input
-                    type="number"
-                    min={0}
-                    value={productForm.originalPrice || ''}
-                    onChange={(e) =>
-                      setProductForm({
-                        ...productForm,
-                        originalPrice: e.target.value ? Number(e.target.value) : undefined,
-                      })
-                    }
-                    placeholder="Optional (shows discount)"
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-neutral-400 mb-1 font-semibold">Stock Quantity *</label>
-                  <input
-                    type="number"
-                    min={0}
-                    required
-                    value={productForm.stock ?? 20}
-                    onChange={(e) => setProductForm({ ...productForm, stock: Number(e.target.value) })}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none"
-                  />
+                  <span className="text-neutral-400">
+                    {bulkPricePct < 0
+                      ? `(${Math.abs(bulkPricePct)}% discount sale)`
+                      : `(+${bulkPricePct}% price adjustment)`}
+                  </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-neutral-400 mb-1 font-semibold">Image URL or Local Path</label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={productForm.imageUrl || ''}
-                    onChange={(e) => setProductForm({ ...productForm, imageUrl: e.target.value })}
-                    placeholder="/src/assets/images/... or https://..."
-                    className="flex-1 bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none"
-                  />
-                  {productForm.imageUrl && (
-                    <img
-                      src={productForm.imageUrl}
-                      alt="Preview"
-                      className="w-10 h-10 object-cover rounded border border-neutral-700 shrink-0"
-                    />
-                  )}
+                <span className="text-neutral-500 text-[11px] block mb-1.5">Quick Presets:</span>
+                <div className="flex flex-wrap gap-2">
+                  {[-50, -30, -20, -15, -10, 5, 10, 15].map((pct) => (
+                    <button
+                      key={pct}
+                      type="button"
+                      onClick={() => setBulkPricePct(pct)}
+                      className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold cursor-pointer transition-colors ${
+                        bulkPricePct === pct
+                          ? 'bg-amber-500 text-neutral-950'
+                          : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
+                      }`}
+                    >
+                      {pct > 0 ? `+${pct}%` : `${pct}%`}
+                    </button>
+                  ))}
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="block text-neutral-400 mb-1 font-semibold">Details & Description</label>
-                <textarea
-                  rows={3}
-                  value={productForm.details || ''}
-                  onChange={(e) => setProductForm({ ...productForm, details: e.target.value })}
-                  className="w-full bg-neutral-950 border border-neutral-700 rounded-lg px-3 py-2 text-white focus:outline-none"
-                />
-              </div>
-
-              {/* Toggles */}
-              <div className="flex flex-wrap gap-4 pt-2 border-t border-neutral-800">
-                <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input
-                    type="checkbox"
-                    checked={productForm.featured ?? false}
-                    onChange={(e) => setProductForm({ ...productForm, featured: e.target.checked })}
-                    className="rounded text-amber-500"
-                  />
-                  <span>Mark as Featured</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input
-                    type="checkbox"
-                    checked={productForm.isNew ?? true}
-                    onChange={(e) => setProductForm({ ...productForm, isNew: e.target.checked })}
-                    className="rounded text-amber-500"
-                  />
-                  <span>Mark as New Arrival</span>
-                </label>
-
-                <label className="flex items-center gap-2 cursor-pointer text-white">
-                  <input
-                    type="checkbox"
-                    checked={productForm.active ?? true}
-                    onChange={(e) => setProductForm({ ...productForm, active: e.target.checked })}
-                    className="rounded text-amber-500"
-                  />
-                  <span>Product is Active (Visible on Live Store)</span>
-                </label>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-neutral-800">
-                <button
-                  type="button"
-                  onClick={() => setProductModalOpen(false)}
-                  className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white font-semibold rounded cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold uppercase rounded cursor-pointer"
-                >
-                  {editingProduct ? 'Save Product Changes' : 'Create Product'}
-                </button>
-              </div>
-            </form>
+            <div className="flex justify-end gap-2 pt-3 border-t border-neutral-800">
+              <button
+                type="button"
+                onClick={() => setBulkPriceModalOpen(false)}
+                className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-white rounded-lg font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleApplyBulkPrices(bulkPricePct)}
+                className="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold uppercase rounded-lg cursor-pointer"
+              >
+                Apply Price Changes
+              </button>
+            </div>
           </div>
         </div>
       )}

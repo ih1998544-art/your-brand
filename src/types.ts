@@ -96,3 +96,24 @@ export interface StoreLocation {
   hours: string;
   type: string;
 }
+
+export interface UserOrder {
+  id: string;
+  date: string;
+  total: number;
+  itemsCount: number;
+  status: 'Processing' | 'Dispatched' | 'Delivered';
+  items?: { name: string; size: string; quantity: number }[];
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  memberTier?: string;
+  loyaltyPoints?: number;
+  isLoggedIn: boolean;
+  orders?: UserOrder[];
+}

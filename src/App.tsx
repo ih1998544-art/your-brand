@@ -18,16 +18,54 @@ import { SearchModal } from './components/SearchModal';
 import { StoreLocatorModal } from './components/StoreLocatorModal';
 import { OrderTrackingModal } from './components/OrderTrackingModal';
 import { SignInModal } from './components/SignInModal';
+import { AccountModal } from './components/AccountModal';
+import { ServerAuthTestModal } from './components/ServerAuthTestModal';
 import { CheckoutModal } from './components/CheckoutModal';
 import { Toast } from './components/Toast';
 import { TeensHomepage } from './components/teens/TeensHomepage';
 import { FragranceBeautyHomepage } from './components/beauty/FragranceBeautyHomepage';
 import { INITIAL_TRENDING_PRODUCTS, INITIAL_TRENDING_FITS, adaptTeenToProduct } from './data/teensData';
+import { UserProfile, UserOrder } from './types';
+import { adminStore } from './services/adminStore';
+import { authService } from './services/authService';
 
 export default function App() {
   // Navigation & Department
   const [currentDepartment, setCurrentDepartment] = useState<Department>('Fragrance & Beauty');
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>(CURRENCIES[0]); // default PKR
+
+  // User Authentication state
+  const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
+    try {
+      const saved = localStorage.getItem('yb_user_profile');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      // ignore
+    }
+    return {
+      name: 'Sara Ahmed',
+      email: 'sara.ahmed@example.com',
+      phone: '+92 300 1234567',
+      address: 'House 42, Street 15, DHA Phase 6',
+      city: 'Karachi',
+      memberTier: 'VIP Atelier Patron',
+      loyaltyPoints: 1250,
+      isLoggedIn: true,
+      orders: [
+        {
+          id: 'YB-84920',
+          date: 'Sep 24, 2026',
+          total: 18480,
+          itemsCount: 2,
+          status: 'Dispatched',
+          items: [
+            { name: 'Peach Lawn Embroidered Co-Ord Set', size: 'M', quantity: 1 },
+            { name: 'Amber Oud Extrait De Parfum', size: '50ml', quantity: 1 },
+          ],
+        },
+      ],
+    };
+  });
 
   // Wishlist state
   const [wishlistIds, setWishlistIds] = useState<Set<string>>(new Set(['rtw-1']));
@@ -35,7 +73,7 @@ export default function App() {
   // Cart state
   const [cartItems, setCartItems] = useState<CartItem[]>([
     {
-      product: PRODUCTS[0], // Peach Lawn Co-Ord
+      product: PRODUCTS[0], // Plum Magenta Embroidered Kurta Set
       size: 'M',
       quantity: 1,
     },
@@ -48,8 +86,25 @@ export default function App() {
   const [storeLocatorOpen, setStoreLocatorOpen] = useState(false);
   const [orderTrackingOpen, setOrderTrackingOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [serverTestOpen, setServerTestOpen] = useState(false);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+
+  // Cart Discount state passed to checkout
+  const [cartDiscount, setCartDiscount] = useState<{ percent: number; code: string }>({
+    percent: 0,
+    code: '',
+  });
+
+  // Verify server-side session on mount
+  React.useEffect(() => {
+    authService.verifySession().then((res) => {
+      if (res.success && res.user) {
+        setCurrentUser(res.user);
+      }
+    });
+  }, []);
 
   // Trending section tab and category filter state
   const [trendingTab, setTrendingTab] = useState<ProductTab>('rtw');
@@ -139,6 +194,39 @@ export default function App() {
     setCartItems([]);
   };
 
+  // User Auth Handlers
+  React.useEffect(() => {
+    try {
+      localStorage.setItem('yb_user_profile', JSON.stringify(currentUser));
+    } catch (e) {
+      // ignore
+    }
+  }, [currentUser]);
+
+  const handleSignInSuccess = (user: UserProfile) => {
+    setCurrentUser(user);
+    notify(`Welcome, ${user.name}!`);
+  };
+
+  const handleSignOut = () => {
+    authService.logout();
+    setCurrentUser({
+      name: 'Guest Client',
+      email: '',
+      isLoggedIn: false,
+      memberTier: 'Guest',
+      loyaltyPoints: 0,
+    });
+    notify('You have signed out from server session.');
+  };
+
+  const handleUpdateProfile = (updated: Partial<UserProfile>) => {
+    setCurrentUser((prev) => ({
+      ...prev,
+      ...updated,
+    }));
+  };
+
   // Wishlist Handlers
   const handleToggleWishlist = (product: Product) => {
     setWishlistIds((prev) => {
@@ -154,6 +242,21 @@ export default function App() {
     });
   };
 
+  const handleMoveToBag = (product: Product, size: string) => {
+    handleQuickAdd(product, size);
+    setWishlistIds((prev) => {
+      const next = new Set(prev);
+      next.delete(product.id);
+      return next;
+    });
+    notify(`Moved to bag: ${product.name} (${size})`);
+  };
+
+  const handleClearWishlist = () => {
+    setWishlistIds(new Set());
+    notify('Wishlist cleared');
+  };
+
   const allTeensAdaptedProducts = useMemo(() => {
     return [
       ...INITIAL_TRENDING_PRODUCTS.map(adaptTeenToProduct),
@@ -162,7 +265,14 @@ export default function App() {
   }, []);
 
   const allAvailableProducts = useMemo(() => {
-    return [...PRODUCTS, ...allTeensAdaptedProducts];
+    const adminList = adminStore.getProducts();
+    const map = new Map<string, Product>();
+    PRODUCTS.forEach((p) => map.set(p.id, p));
+    adminList.forEach((p) => map.set(p.id, p));
+    allTeensAdaptedProducts.forEach((p) => {
+      if (!map.has(p.id)) map.set(p.id, p);
+    });
+    return Array.from(map.values());
   }, [allTeensAdaptedProducts]);
 
   // Filtered lists
@@ -314,10 +424,14 @@ export default function App() {
         currencies={CURRENCIES}
         wishlistCount={wishlistIds.size}
         cartCount={totalCartCount}
+        currentUser={currentUser}
         onOpenWishlist={() => setWishlistOpen(true)}
         onOpenCart={() => setCartOpen(true)}
         onOpenSearch={() => setSearchOpen(true)}
         onOpenSignIn={() => setSignInOpen(true)}
+        onOpenAccount={() => setAccountOpen(true)}
+        onOpenServerTest={() => setServerTestOpen(true)}
+        onSignOut={handleSignOut}
         onOpenTracking={() => setOrderTrackingOpen(true)}
         onOpenStoreLocator={() => setStoreLocatorOpen(true)}
         onFilterCategory={handleShopCategory}
@@ -427,7 +541,8 @@ export default function App() {
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveFromCart}
         onClearCart={handleClearCart}
-        onCheckout={() => {
+        onCheckout={(discountPercent, promoCode) => {
+          setCartDiscount({ percent: discountPercent || 0, code: promoCode || '' });
           setCartOpen(false);
           setCheckoutOpen(true);
         }}
@@ -441,7 +556,9 @@ export default function App() {
         wishlistProducts={wishlistProducts}
         currency={selectedCurrency}
         onRemoveFromWishlist={handleToggleWishlist}
+        onClearWishlist={handleClearWishlist}
         onQuickAdd={handleQuickAdd}
+        onMoveToBag={handleMoveToBag}
         onViewProduct={(p) => setSelectedProduct(p)}
       />
 
@@ -480,10 +597,44 @@ export default function App() {
         onNotify={notify}
       />
 
-      {/* Customer Portal Sign In Modal */}
+      {/* Customer VIP Account Modal */}
+      <AccountModal
+        isOpen={accountOpen}
+        onClose={() => setAccountOpen(false)}
+        user={currentUser}
+        currency={selectedCurrency}
+        wishlistCount={wishlistIds.size}
+        cartCount={totalCartCount}
+        onOpenWishlist={() => {
+          setAccountOpen(false);
+          setWishlistOpen(true);
+        }}
+        onOpenCart={() => {
+          setAccountOpen(false);
+          setCartOpen(true);
+        }}
+        onOpenTracking={() => {
+          setAccountOpen(false);
+          setOrderTrackingOpen(true);
+        }}
+        onUpdateProfile={handleUpdateProfile}
+        onSignOut={handleSignOut}
+        onNotify={notify}
+      />
+
+      {/* Customer Portal Sign In / Register Modal */}
       <SignInModal
         isOpen={signInOpen}
         onClose={() => setSignInOpen(false)}
+        onNotify={notify}
+        onSignInSuccess={handleSignInSuccess}
+        onOpenServerTest={() => setServerTestOpen(true)}
+      />
+
+      {/* Live Server-Side Authentication Test & Diagnostics Modal */}
+      <ServerAuthTestModal
+        isOpen={serverTestOpen}
+        onClose={() => setServerTestOpen(false)}
         onNotify={notify}
       />
 
@@ -493,8 +644,18 @@ export default function App() {
         onClose={() => setCheckoutOpen(false)}
         items={cartItems}
         currency={selectedCurrency}
-        onOrderSuccess={(orderId) => {
+        appliedDiscount={cartDiscount.percent}
+        promoCode={cartDiscount.code}
+        currentUser={currentUser}
+        onOrderSuccess={(orderId, orderDetails) => {
           handleClearCart();
+          if (orderDetails && currentUser.isLoggedIn) {
+            setCurrentUser((prev) => ({
+              ...prev,
+              orders: [orderDetails, ...(prev.orders || [])],
+              loyaltyPoints: (prev.loyaltyPoints || 0) + Math.round(orderDetails.total / 100),
+            }));
+          }
           notify(`Order placed successfully: ${orderId}`);
         }}
       />
