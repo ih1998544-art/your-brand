@@ -43,13 +43,13 @@ export default function App() {
       // ignore
     }
     return {
-      name: 'Sara Ahmed',
-      email: 'sara.ahmed@example.com',
+      name: 'Sajjad',
+      email: 'sajjad501633@gmail.com',
       phone: '+92 300 1234567',
       address: 'House 42, Street 15, DHA Phase 6',
       city: 'Karachi',
-      memberTier: 'VIP Atelier Patron',
-      loyaltyPoints: 1250,
+      memberTier: 'Diamond Atelier Patron',
+      loyaltyPoints: 3450,
       isLoggedIn: true,
       orders: [
         {

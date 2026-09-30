@@ -107,7 +107,7 @@ class AdminStoreService {
   private reviews: AdminReview[] = [];
   private adminUsers: AdminUser[] = [];
   private frontendContent: FrontendContentConfig = {
-    logoText: 'YOUR BRAND',
+    logoText: 'IH',
     promoBarText: 'Complimentary luxury gift packaging on all orders',
     heroHeading: 'LUXURY COUTURE & SIGNATURE FRAGRANCES',
     heroSubheading: 'Explore the newly unveiled festive and pret collections.',

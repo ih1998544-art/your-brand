@@ -26,6 +26,30 @@ export const Footer: React.FC<FooterProps> = ({
   return (
     <footer className="bg-neutral-950 text-neutral-100 pt-16 pb-8 px-4 sm:px-8 md:px-12 border-t border-neutral-800">
       <div className="max-w-7xl mx-auto">
+        {/* Brand Monogram Header in Footer */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-10 mb-10 border-b border-neutral-800/80 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="bg-white p-2 rounded-xs flex items-center justify-center shadow-xs">
+              <img
+                src="/src/assets/images/brand_logo.jpg"
+                alt="IH"
+                className="h-10 w-auto object-contain"
+              />
+            </div>
+            <div>
+              <span className="font-serif text-lg font-bold tracking-[0.25em] uppercase text-white block">
+                IH
+              </span>
+              <span className="text-[10px] tracking-[0.2em] uppercase text-neutral-400">
+                Luxury Haute Couture &amp; Fragrance Atelier
+              </span>
+            </div>
+          </div>
+          <p className="text-xs text-neutral-400 max-w-md">
+            Celebrating Pakistani heirloom craftsmanship, pure silks, master bespoke tailoring, and artisanal perfumery.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-10 pb-12">
           {/* Column 1: Contact */}
           <div>
@@ -45,10 +69,10 @@ export const Footer: React.FC<FooterProps> = ({
               <li>Sun: 11am–8pm (PKT)</li>
               <li>
                 <a
-                  href="mailto:eshop@yourbrand.com"
+                  href="mailto:eshop@ihluxury.com"
                   className="hover:text-white transition-colors"
                 >
-                  eshop@yourbrand.com
+                  eshop@ihluxury.com
                 </a>
               </li>
             </ul>
@@ -62,7 +86,7 @@ export const Footer: React.FC<FooterProps> = ({
             <ul className="space-y-2.5 text-xs text-neutral-400">
               <li>
                 <button
-                  onClick={() => onNotify('YOUR BRAND was founded with a passion for heirloom craft.')}
+                  onClick={() => onNotify('IH was founded with a passion for heirloom craft.')}
                   className="hover:text-white transition-colors text-left"
                 >
                   About us
@@ -70,7 +94,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li>
                 <button
-                  onClick={() => onNotify('Explore design and retail opportunities at YOUR BRAND.')}
+                  onClick={() => onNotify('Explore design and retail opportunities at IH.')}
                   className="hover:text-white transition-colors text-left"
                 >
                   Careers
@@ -159,17 +183,17 @@ export const Footer: React.FC<FooterProps> = ({
             </h3>
             <ul className="space-y-2.5 text-xs text-neutral-400">
               <li>
-                <a href="#instagram" onClick={(e) => { e.preventDefault(); onNotify('Follow @yourbrand on Instagram'); }} className="hover:text-white transition-colors">
+                <a href="#instagram" onClick={(e) => { e.preventDefault(); onNotify('Follow @ih.atelier on Instagram'); }} className="hover:text-white transition-colors">
                   Instagram
                 </a>
               </li>
               <li>
-                <a href="#facebook" onClick={(e) => { e.preventDefault(); onNotify('Follow YOUR BRAND on Facebook'); }} className="hover:text-white transition-colors">
+                <a href="#facebook" onClick={(e) => { e.preventDefault(); onNotify('Follow IH Haute Couture on Facebook'); }} className="hover:text-white transition-colors">
                   Facebook
                 </a>
               </li>
               <li>
-                <a href="#x" onClick={(e) => { e.preventDefault(); onNotify('Follow @yourbrand on X'); }} className="hover:text-white transition-colors">
+                <a href="#x" onClick={(e) => { e.preventDefault(); onNotify('Follow @ih_atelier on X'); }} className="hover:text-white transition-colors">
                   X (Twitter)
                 </a>
               </li>
@@ -216,7 +240,7 @@ export const Footer: React.FC<FooterProps> = ({
 
         {/* Fine Print Footer */}
         <div className="pt-6 border-t border-neutral-800 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-neutral-500">
-          <p>&copy; 2026 YOUR BRAND. All rights reserved.</p>
+          <p>&copy; 2026 IH Luxury Atelier. All rights reserved.</p>
           <div className="flex gap-6">
             <button
               onClick={() => onNotify('Terms & Conditions policy updated for 2026.')}

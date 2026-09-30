@@ -1,0 +1,72 @@
+[
+  {
+    "id": "usr_16a025465bc2",
+    "email": "sajjad501633@gmail.com",
+    "salt": "1ac7bd3656be1db82d22444b10266277",
+    "passwordHash": "c28853e469d6299e6c0f1f374c8b5c4d0d108d1da3212cc0d2644b1af69af8a8d1fe0576322da02ef903f1073e173921cb49e9d35ce5e1290eef299a4585baae",
+    "name": "Sajjad",
+    "phone": "+92 300 1234567",
+    "address": "House 42, Street 15, DHA Phase 6",
+    "city": "Karachi",
+    "memberTier": "Diamond Atelier Patron",
+    "loyaltyPoints": 3450,
+    "role": "vip",
+    "createdAt": "2026-09-30T01:51:41.402Z"
+  },
+  {
+    "id": "usr_c433632887cf",
+    "email": "sara.ahmed@example.com",
+    "salt": "78305184f921795748852f166e81c54c",
+    "passwordHash": "4d807b09d4529e7989567e52b2c5701ef02da93359913582cbfb07475aec8998713a189d76e27c976c105539d05d3253b3dc2d3623bd5ef9f39aef8143e3c385",
+    "name": "Sara Ahmed",
+    "phone": "+92 300 1234567",
+    "address": "House 42, Street 15, DHA Phase 6",
+    "city": "Karachi",
+    "memberTier": "VIP Atelier Patron",
+    "loyaltyPoints": 1250,
+    "role": "vip",
+    "createdAt": "2026-09-30T01:51:41.404Z"
+  },
+  {
+    "id": "usr_7f7a4c5bd4f7",
+    "email": "admin@ihluxury.com",
+    "salt": "08e12cd77a97db1e2a3a085d68ef915e",
+    "passwordHash": "bcc5e65842b3d63e5c2a2ee0cd9b9e5d629ce73dff674097aa9764091f184968b6c800f6432337143e8c8745437ffd1aab7e6eb22b5dc58179069f3d253bae61",
+    "name": "Atelier Director",
+    "phone": "+92 300 0000000",
+    "address": "IH Flagship Atelier, M.M. Alam Road",
+    "city": "Lahore",
+    "memberTier": "Executive Administrator",
+    "loyaltyPoints": 9999,
+    "role": "admin",
+    "createdAt": "2026-09-30T01:51:41.405Z"
+  },
+  {
+    "id": "usr_81179c158ec5",
+    "email": "ayesha.khan@example.com",
+    "salt": "aa55814efd5cb55096f315edb6be53b1",
+    "passwordHash": "b20fa08834276b7bf1de82bf74c99133180de99a76b34510310b0fb33554df5f9382719cc7d08dbbc408e5e49727f85766b753a164b49430dd92837ff6f2a2c0",
+    "name": "Ayesha Khan",
+    "phone": "+92 321 9876543",
+    "address": "Apartment 4B, Clifton Block 4",
+    "city": "Karachi",
+    "memberTier": "Gold Patron",
+    "loyaltyPoints": 650,
+    "role": "customer",
+    "createdAt": "2026-09-30T01:51:41.406Z"
+  },
+  {
+    "id": "usr_6e5949c07bea",
+    "email": "newclient@example.com",
+    "salt": "b3afd6de60a1d077e61cf3d7da757d08",
+    "passwordHash": "5a6d15b329cfa6b528f5c074c13b6f5e3a94b82441f9fa98188dafca2a9a282ffdd0e78413c4ef381441306e83672525e120414c17c7c989deac4a2644310037",
+    "name": "newclient",
+    "phone": "",
+    "address": "",
+    "city": "Karachi",
+    "memberTier": "VIP Atelier Patron",
+    "loyaltyPoints": 500,
+    "role": "customer",
+    "createdAt": "2026-09-30T01:51:47.924Z"
+  }
+]

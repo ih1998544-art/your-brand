@@ -472,12 +472,16 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
             >
               <Menu className="w-5 h-5" />
             </button>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center shadow-xs">
-                <Shield className="w-4 h-4 text-neutral-950 font-bold" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-md bg-white p-1 flex items-center justify-center shadow-xs">
+                <img
+                  src="/src/assets/images/brand_logo.jpg"
+                  alt="IH"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <span className="font-serif font-bold tracking-wider text-base uppercase text-white">
-                YOUR BRAND <span className="text-amber-400 font-sans text-xs font-normal">ADMIN</span>
+                IH <span className="text-amber-400 font-sans text-xs font-normal">ADMIN</span>
               </span>
             </div>
             <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -2235,7 +2239,7 @@ export const AdminPanelModal: React.FC<AdminPanelModalProps> = ({
                       <label className="block text-neutral-400 mb-1">Company Registered Name</label>
                       <input
                         type="text"
-                        defaultValue="YOUR BRAND Retail (Pvt) Ltd."
+                        defaultValue="IH Luxury Retail (Pvt) Ltd."
                         className="w-full bg-neutral-900 border border-neutral-800 rounded px-3 py-2 text-white focus:outline-none"
                       />
                     </div>

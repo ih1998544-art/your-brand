@@ -154,7 +154,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* ======================================================== */}
       {/* 2. MAIN HEADER (Zero Collision, 100% Exact Center Logo) */}
       {/* Left: WOMEN, MEN, TEENS, FRAGRANCE & BEAUTY, admin panel  */}
-      {/* Center: [YOUR BRAND ]                                    */}
+      {/* Center: [IH Monogram Logo]                               */}
       {/* Right: SEARCH, WISHLIST (with count), BAG (with count)    */}
       {/* ======================================================== */}
       <header className="sticky top-0 z-30 bg-white/98 backdrop-blur-md border-b border-neutral-200 transition-all shadow-xs">
@@ -234,7 +234,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* CENTER: Exact Center Brand Logo / Name: [YOUR BRAND ] */}
+          {/* CENTER: Exact Center Brand Logo: [IH Monogram] */}
           <div className="flex items-center justify-center px-4 shrink-0">
             <a
               href="#"
@@ -242,9 +242,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="font-serif text-2xl xl:text-3xl font-bold tracking-[0.18em] uppercase text-neutral-950 hover:opacity-85 transition-opacity whitespace-nowrap leading-none"
+              className="flex items-center justify-center hover:opacity-85 transition-opacity py-0.5 group"
+              title="IH Luxury Atelier"
             >
-              YOUR BRAND
+              <img
+                src="/src/assets/images/brand_logo.jpg"
+                alt="IH"
+                className="h-11 xl:h-13 w-auto object-contain mix-blend-multiply group-hover:scale-102 transition-transform"
+              />
             </a>
           </div>
 
@@ -349,7 +354,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           </div>
 
-          {/* Center: EXACT CENTER BRAND LOGO: [YOUR BRAND ] */}
+          {/* Center: EXACT CENTER BRAND LOGO: [IH Monogram] */}
           <div className="absolute left-1/2 -translate-x-1/2 z-10 flex items-center justify-center pointer-events-auto">
             <a
               href="#"
@@ -357,9 +362,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                 e.preventDefault();
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="font-serif text-lg sm:text-xl font-bold tracking-[0.14em] uppercase text-neutral-950 truncate max-w-[170px] sm:max-w-none text-center"
+              className="flex items-center justify-center hover:opacity-85 transition-opacity"
+              title="IH Luxury Atelier"
             >
-              YOUR BRAND
+              <img
+                src="/src/assets/images/brand_logo.jpg"
+                alt="IH"
+                className="h-8 sm:h-9 w-auto object-contain mix-blend-multiply"
+              />
             </a>
           </div>
 
@@ -1080,10 +1090,17 @@ export const Navbar: React.FC<NavbarProps> = ({
           {/* Content Panel */}
           <div className="relative w-full max-w-sm bg-white h-full shadow-2xl z-10 flex flex-col justify-between overflow-y-auto">
             <div>
-              <div className="flex items-center justify-between p-4 border-b border-neutral-200">
-                <span className="font-serif text-lg font-bold tracking-widest uppercase">
-                  YOUR BRAND
-                </span>
+              <div className="flex items-center justify-between p-3.5 sm:p-4 border-b border-neutral-200">
+                <div className="flex items-center gap-2.5">
+                  <img
+                    src="/src/assets/images/brand_logo.jpg"
+                    alt="IH"
+                    className="h-8 w-auto object-contain mix-blend-multiply"
+                  />
+                  <span className="font-serif text-xs font-bold tracking-[0.2em] uppercase text-neutral-900 border-l border-neutral-300 pl-2.5">
+                    ATELIER
+                  </span>
+                </div>
                 <button
                   onClick={() => setMobileMenuOpen(false)}
                   className="p-1.5 text-neutral-600 hover:text-black cursor-pointer"

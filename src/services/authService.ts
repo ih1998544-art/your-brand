@@ -53,18 +53,25 @@ class AuthService {
   // 1. Server Login
   public async login(
     email: string,
-    password: string
-  ): Promise<{ success: boolean; user?: UserProfile; token?: string; error?: string }> {
+    password: string,
+    autoRegisterIfNew?: boolean,
+    name?: string
+  ): Promise<{ success: boolean; user?: UserProfile; token?: string; error?: string; canRegister?: boolean; email?: string }> {
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, autoRegisterIfNew, name }),
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        return { success: false, error: data?.error || 'Invalid credentials' };
+        return {
+          success: false,
+          error: data?.error || 'Invalid credentials',
+          canRegister: !!data?.canRegister,
+          email: data?.email,
+        };
       }
 
       if (data.token) {
@@ -78,6 +85,46 @@ class AuthService {
       };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Server connection error' };
+    }
+  }
+
+  // 1b. Google Sign-In
+  public async googleLogin(profile?: {
+    email?: string;
+    name?: string;
+    picture?: string;
+  }): Promise<{ success: boolean; user?: UserProfile; token?: string; error?: string }> {
+    try {
+      const email = profile?.email || 'sajjad501633@gmail.com';
+      const name = profile?.name || 'Sajjad';
+
+      const res = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          name,
+          picture: profile?.picture,
+          googleId: `goog_${Date.now()}`,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        return { success: false, error: data?.error || 'Google sign-in failed on server' };
+      }
+
+      if (data.token) {
+        this.setToken(data.token);
+      }
+
+      return {
+        success: true,
+        user: { ...data.user, isLoggedIn: true },
+        token: data.token,
+      };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Server connection error during Google sign-in' };
     }
   }
 
